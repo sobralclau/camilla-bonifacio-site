@@ -48,28 +48,32 @@ O cabeçalho, as seções terracota e preta, o contato, o rodapé e o favicon us
 
 A imagem Open Graph é uma cópia da fotografia autorizada de blazer, sem alteração. Título e descrição acompanham a imagem nos metadados. URLs absolutas, canonical, sitemap e `og:image` são inseridos somente quando `SITE_URL` é configurado. A ausência de domínio não gera endereços fictícios.
 
-## GitHub e Cloudflare Pages
+## GitHub e Cloudflare Workers
 
-A entrega não criou repositório remoto, não vinculou contas e não publicou o site. Essas ações aguardam solicitação.
+O repositório remoto está na branch `main` e o deploy é feito pela integração do GitHub com Cloudflare Workers.
 
-1. Crie um repositório no GitHub e envie o código na branch `main`, sem `node_modules`, anexos privados ou segredos.
-2. No Cloudflare, abra Workers & Pages, selecione Pages e importe o repositório Git.
-3. Use preset de framework `None`, branch de produção `main`, comando `npm run build` e diretório de saída `dist`.
-4. Configure uma versão suportada do Node.js, no mínimo 22.
-5. Faça alterações em uma branch separada e revise o endereço de preview do Pages antes de mesclar em `main`.
-6. Depois de existir um endereço efetivo aprovado, configure `SITE_URL` com essa origem, sem caminho, por exemplo o domínio confirmado. A variável pode ser diferente nos ambientes de produção e preview. Deixe vazia até conhecer o endereço.
+Configuração de produção:
 
-O `package-lock.json` fixa as versões de desenvolvimento. Não existem configurações de outro provedor.
+1. Branch: `main`.
+2. Build: `npm run build`.
+3. Diretório gerado: `dist`.
+4. Deploy: `npx wrangler deploy`.
+5. Node.js: 22 ou superior.
+6. O arquivo `wrangler.jsonc` publica `./dist` como Static Assets.
+
+Depois de existir um endereço efetivo aprovado, configure `SITE_URL` com a origem definitiva, sem caminho, para gerar canonical, sitemap e Open Graph absolutos.
+
+O `package-lock.json` fixa as versões de desenvolvimento.
 
 ### Domínio próprio
 
-Após definir o domínio, adicione-o em Custom domains do projeto Pages. Faça os ajustes DNS indicados pelo Cloudflare para o caso de domínio raiz ou subdomínio. Confirme o estado ativo e o HTTPS. Escolha uma versão principal, com ou sem `www`, configure `SITE_URL` com ela e direcione a outra versão por redirecionamento no Cloudflare. Defina também a política de acesso/redirecionamento do endereço `pages.dev`. Não configure DNS ou redirects com nomes provisórios.
+Após definir o domínio, adicione-o em Domains/Custom Domains do Worker. Confirme DNS ativo e HTTPS. Escolha uma versão principal, com ou sem `www`, configure `SITE_URL` com essa origem e redirecione a versão alternativa para a principal. Não configure canonical ou redirects com domínio provisório.
 
 Documentação oficial consultada:
 
-- https://developers.cloudflare.com/pages/configuration/git-integration/
-- https://developers.cloudflare.com/pages/framework-guides/deploy-anything/
-- https://developers.cloudflare.com/pages/configuration/custom-domains/
+- https://developers.cloudflare.com/workers/static-assets/
+- https://developers.cloudflare.com/workers/wrangler/configuration/
+- https://developers.cloudflare.com/workers/configuration/routing/custom-domains/
 
 ## WhatsApp e medição
 
