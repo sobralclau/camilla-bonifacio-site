@@ -1,0 +1,148 @@
+[
+  {
+    "id": "curadoria-imobiliaria",
+    "kind": "service",
+    "serviceId": "curadoria",
+    "eyebrow": "Serviço",
+    "title": "Curadoria imobiliária com critérios claros",
+    "intro": "A busca começa pelo que precisa funcionar na sua vida. Antes de selecionar imóveis, a curadoria organiza prioridades, restrições e preferências para reduzir visitas sem aderência e tornar a comparação mais objetiva.",
+    "sections": [
+      {"title":"O que orienta a seleção","text":"Localização, orçamento, configuração dos ambientes, incidência de luz, circulação, estado do imóvel e possibilidades de adaptação são observados em conjunto. A metragem deixa de ser um dado isolado e passa a ser relacionada ao modo como os espaços serão usados."},
+      {"title":"Como comparar opções","text":"Os imóveis selecionados podem ser confrontados pelos mesmos critérios. Isso ajuda a separar preferências estéticas de fatores que afetam a rotina, os custos e a necessidade de futuras intervenções."},
+      {"title":"Limites e verificações","text":"A curadoria apoia a escolha, mas não substitui avaliação estrutural, laudo técnico, análise jurídica, aprovação de reforma ou avaliação bancária. Documentação, matrícula e condições contratuais devem ser verificadas pelos profissionais responsáveis antes da decisão."}
+    ],
+    "checklist": ["Prioridades e itens inegociáveis", "Uso previsto para cada ambiente", "Comparação coerente entre imóveis", "Pendências que exigem análise especializada"],
+    "ctaLabel": "Quero uma curadoria",
+    "message": "Olá, Camilla! Li sobre sua curadoria imobiliária e gostaria de organizar meus critérios para buscar um imóvel. Podemos conversar?",
+    "sources": [
+      {"label":"CAU/BR, planejamento e necessidades do cliente","url":"https://caubr.gov.br/todos/?page_id=452"},
+      {"label":"COFECI, dever de informar circunstâncias e riscos do negócio","url":"https://www.cofeci.gov.br/post/corretor-de-im%C3%B3veis-profissional-qualificado"},
+      {"label":"CAIXA, matrícula e documentação do imóvel","url":"https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx"}
+    ]
+  },
+  {
+    "id": "arquitetura-residencial",
+    "kind": "service",
+    "serviceId": "arquitetura",
+    "eyebrow": "Serviço",
+    "title": "Arquitetura residencial a partir da sua rotina",
+    "intro": "Um projeto consistente nasce de um programa de necessidades bem definido. A conversa inicial identifica hábitos, prioridades, limitações e expectativas para transformar desejos em decisões espaciais coerentes.",
+    "sections": [
+      {"title":"Programa de necessidades","text":"A quantidade e a relação entre os ambientes são organizadas a partir de quem vai usar o espaço. Trabalho, descanso, convivência, armazenamento, acessibilidade e mudanças futuras entram na análise desde o início."},
+      {"title":"Uso, materiais e iluminação","text":"Layout, mobiliário, acabamentos e iluminação são pensados como partes do mesmo sistema. A solução deve conciliar funcionalidade, conforto visual, manutenção e identidade, respeitando o imóvel e o orçamento definido."},
+      {"title":"Escopo antes da execução","text":"Cada projeto deve ter escopo, etapas, entregáveis e responsabilidades definidos. Intervenções físicas podem exigir levantamentos, projetos complementares, autorizações, registros e acompanhamento específico."}
+    ],
+    "checklist": ["Necessidades atuais e futuras", "Relação entre ambientes e mobiliário", "Materiais adequados ao uso", "Escopo técnico documentado"],
+    "ctaLabel": "Quero conversar sobre meu projeto",
+    "message": "Olá, Camilla! Conheci sua abordagem de arquitetura residencial e gostaria de conversar sobre as necessidades do meu espaço.",
+    "sources": [
+      {"label":"CAU/BR, 12 passos antes de construir ou reformar","url":"https://caubr.gov.br/contrate-um-arquiteto-12-passos/"},
+      {"label":"CAU/BR, atribuições em arquitetura de interiores","url":"https://transparencia.caubr.gov.br/resolucao51/"},
+      {"label":"CAU/BR, arquitetura de interiores e necessidades de utilização","url":"https://caubr.gov.br/atribuicoes-entenda-a-diferenca-de-arquitetura-de-interiores-e-de-decoracao/"}
+    ]
+  },
+  {
+    "id": "consultoria-e-acompanhamento",
+    "kind": "service",
+    "serviceId": "consultoria",
+    "eyebrow": "Serviço",
+    "title": "Consultoria para decidir com mais clareza",
+    "intro": "Quando existem várias opções, a principal dificuldade costuma ser organizar as perguntas certas. A consultoria estrutura a análise e registra o que precisa ser confirmado antes de avançar.",
+    "sections": [
+      {"title":"Leitura orientada","text":"Plantas, fotografias, informações do anúncio e observações de visita são reunidas em uma leitura comparável. A atenção se volta para o uso dos ambientes, a circulação, a iluminação e as limitações perceptíveis em cada opção."},
+      {"title":"Dúvidas em ordem de prioridade","text":"Questões que afetam a decisão são separadas de preferências que podem ser ajustadas depois. O objetivo é evitar que um acabamento atraente esconda incompatibilidades importantes com a rotina."},
+      {"title":"Encaminhamento responsável","text":"Sempre que surgir uma questão estrutural, jurídica, registral, financeira ou condominial, a orientação é encaminhar a verificação ao profissional competente. A consultoria não substitui laudos, certidões ou aprovações."}
+    ],
+    "checklist": ["Comparação com o mesmo conjunto de critérios", "Registro das dúvidas de cada opção", "Separação entre estética e funcionalidade", "Indicação das verificações necessárias"],
+    "ctaLabel": "Quero orientação para escolher",
+    "message": "Olá, Camilla! Li sobre sua consultoria e gostaria de organizar a comparação entre os imóveis que estou avaliando.",
+    "sources": [
+      {"label":"CAU/BR, assistência técnica como atividade profissional","url":"https://caubr.gov.br/conheca-os-sete-grupos-de-atividades-dos-arquitetos-e-urbanistas/"},
+      {"label":"COFECI, informações corretas e riscos do negócio","url":"https://www.cofeci.gov.br/post/corretor-de-im%C3%B3veis-profissional-qualificado"},
+      {"label":"CAIXA, informações e documentos do imóvel","url":"https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx"}
+    ]
+  },
+  {
+    "id": "planta-e-circulacao",
+    "kind": "criterion",
+    "criterionId": "planta",
+    "eyebrow": "Critério de escolha",
+    "title": "Planta e circulação: como o espaço funciona",
+    "intro": "Uma planta eficiente não depende apenas da metragem. A relação entre acessos, passagens, portas, mobiliário e áreas de permanência determina quanto do espaço pode ser realmente aproveitado.",
+    "sections": [
+      {"title":"Percursos do dia a dia","text":"Vale observar o caminho entre entrada, cozinha, quartos, banheiros e áreas de serviço. Cruzamentos desconfortáveis, corredores excessivos ou portas conflitantes podem reduzir a qualidade de uso mesmo em imóveis amplos."},
+      {"title":"Mobiliário em escala","text":"A posição de sofás, camas, mesas e armários deve ser testada com medidas coerentes. O espaço livre ao redor dos móveis importa tanto quanto o próprio encaixe."},
+      {"title":"Acessibilidade e mudanças futuras","text":"Circulação, desníveis e larguras de passagem merecem atenção quando existe mobilidade reduzida ou quando o imóvel precisa acompanhar diferentes fases da vida. A conformidade técnica deve ser verificada em projeto ou vistoria específica."}
+    ],
+    "checklist": ["Percursos sem conflitos", "Abertura de portas e armários", "Mobiliário representado em escala", "Condições de circulação e acessibilidade"],
+    "ctaLabel": "Quero avaliar a planta de um imóvel",
+    "message": "Olá, Camilla! Li o conteúdo sobre planta e circulação e gostaria de avaliar como um imóvel pode funcionar para minha rotina.",
+    "sources": [
+      {"label":"ABNT NBR 9050:2020, disponibilizada pela Prefeitura de São Paulo","url":"https://www.prefeitura.sp.gov.br/cidade/secretarias/upload/NBR9050_20.pdf"},
+      {"label":"CAU/BR, programa de necessidades no projeto","url":"https://caubr.gov.br/contrate-um-arquiteto-12-passos/"}
+    ]
+  },
+  {
+    "id": "luz-e-ambientes",
+    "kind": "criterion",
+    "criterionId": "luz",
+    "eyebrow": "Critério de escolha",
+    "title": "Luz, ventilação e uso dos ambientes",
+    "intro": "A orientação das aberturas, a incidência solar e a possibilidade de ventilação influenciam conforto, uso e consumo de energia. A visita deve considerar diferentes horários sempre que possível.",
+    "sections": [
+      {"title":"Incidência solar","text":"A mesma fachada recebe sol de maneira diferente ao longo do dia e do ano. É importante relacionar a orientação com o clima local, o uso de cada ambiente e a presença de elementos de sombreamento."},
+      {"title":"Ventilação e renovação do ar","text":"A posição e a relação entre aberturas interferem no movimento do ar. Obstáculos externos, profundidade dos ambientes e possibilidade de ventilação cruzada também merecem observação."},
+      {"title":"Luz natural sem ofuscamento","text":"Mais entrada de luz nem sempre significa melhor desempenho. Distribuição, proteção solar e reflexos precisam ser avaliados para evitar calor excessivo ou desconforto visual."}
+    ],
+    "checklist": ["Orientação das principais janelas", "Horários de incidência solar", "Possibilidade de ventilação cruzada", "Proteção contra excesso de sol e ofuscamento"],
+    "ctaLabel": "Quero analisar luz e ventilação",
+    "message": "Olá, Camilla! Li o conteúdo sobre luz e ventilação e gostaria de considerar esses fatores na escolha do meu imóvel.",
+    "sources": [
+      {"label":"ProjetEEE, estratégia de ventilação natural","url":"https://projeteee.mme.gov.br/estrategia/ventilacao-natural/"},
+      {"label":"ProjetEEE, estratégia de sombreamento","url":"https://projeteee.mme.gov.br/estrategia/sombreamento/"},
+      {"label":"Ministério de Minas e Energia, eficiência energética nas edificações","url":"https://www.gov.br/mme/pt-br/assuntos/ee/indices-minimos-de-ee/eficiencia-energetica-das-edificacoes"}
+    ]
+  },
+  {
+    "id": "materiais-e-adaptacoes",
+    "kind": "criterion",
+    "criterionId": "materiais",
+    "eyebrow": "Critério de escolha",
+    "title": "Materiais e possibilidades de adaptação",
+    "intro": "Acabamentos contam parte da história do imóvel, mas a análise precisa ir além da aparência. Estado de conservação, manutenção, compatibilidade de sistemas e limites de intervenção mudam o custo e a complexidade de qualquer adaptação.",
+    "sections": [
+      {"title":"Conservação e manutenção","text":"Pisos, esquadrias, bancadas, revestimentos e marcenaria devem ser observados quanto a desgaste, reposição e facilidade de manutenção. Sinais aparentes podem indicar a necessidade de avaliação técnica específica."},
+      {"title":"O que pode ou não mudar","text":"Paredes, instalações, fachadas, áreas molhadas e elementos condominiais têm restrições diferentes. Nenhuma possibilidade de alteração deve ser tratada como garantida sem documentação, levantamento e análise profissional."},
+      {"title":"Custo de adaptação","text":"Uma solução aparentemente simples pode envolver demolição, adequação de infraestrutura, compatibilização e novos acabamentos. Comparar imóveis também significa considerar o esforço necessário para alcançar o resultado desejado."}
+    ],
+    "checklist": ["Estado e manutenção dos acabamentos", "Restrições do condomínio e da edificação", "Infraestrutura existente", "Necessidade de projeto e aprovação"],
+    "ctaLabel": "Quero entender as adaptações possíveis",
+    "message": "Olá, Camilla! Li o conteúdo sobre materiais e adaptações e gostaria de entender melhor uma opção de imóvel.",
+    "sources": [
+      {"label":"CAU/BR, definição de arquitetura de interiores","url":"https://transparencia.caubr.gov.br/resolucao51/"},
+      {"label":"CAU/BR, guia para contratação de arquitetura de interiores","url":"https://caubr.gov.br/wp-content/uploads/2023/02/Guia-de-Orientacoes-para-a-Contratacao-de-Servicos-de-Arquitetura-de-Interiores.pdf"},
+      {"label":"CAU/BR, construir ou reformar com profissional habilitado","url":"https://caubr.gov.br/vai-construir-ou-reformar-contrate-um-arquiteto-e-urbanista/"}
+    ]
+  },
+  {
+    "id": "imovel-e-rotina",
+    "kind": "criterion",
+    "criterionId": "rotina",
+    "eyebrow": "Critério de escolha",
+    "title": "Compatibilidade entre imóvel e rotina",
+    "intro": "O melhor imóvel não é o que reúne mais atributos, mas o que responde às prioridades de quem vai morar. Uma escolha consistente considera o presente e mudanças previsíveis sem depender de uma transformação incerta.",
+    "sections": [
+      {"title":"Hábitos que precisam de espaço","text":"Trabalho em casa, refeições, recebimento de visitas, animais, armazenamento e momentos de descanso criam demandas diferentes. Nomear esses hábitos ajuda a avaliar a função de cada ambiente."},
+      {"title":"Prioridades e concessões","text":"Toda busca envolve escolhas. Organizar o que é indispensável, desejável ou ajustável evita decisões guiadas somente pelo impacto visual da visita."},
+      {"title":"Cenários futuros","text":"Mudanças profissionais, mobilidade, composição familiar e manutenção podem alterar o uso do imóvel. O objetivo não é prever tudo, mas identificar limitações relevantes antes da compra."}
+    ],
+    "checklist": ["Hábitos e atividades recorrentes", "Itens indispensáveis e negociáveis", "Necessidade de armazenamento", "Mudanças previsíveis de uso"],
+    "ctaLabel": "Quero avaliar a compatibilidade",
+    "message": "Olá, Camilla! Li o conteúdo sobre imóvel e rotina e gostaria de organizar minhas prioridades para escolher melhor.",
+    "sources": [
+      {"label":"CAU/BR, necessidades do cliente no planejamento","url":"https://caubr.gov.br/todos/?page_id=452"},
+      {"label":"CAU/BR, programa de necessidades antes do projeto","url":"https://caubr.gov.br/contrate-um-arquiteto-12-passos/"},
+      {"label":"CAU/BR, sustentabilidade e expectativas dos usuários","url":"https://caubr.gov.br/wp-content/uploads/2017/02/Guia-Sustentabilidade-na-Arquitetura.pdf"}
+    ]
+  }
+]

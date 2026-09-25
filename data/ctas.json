@@ -1,0 +1,8 @@
+{
+ "header":{"label":"Fale com Camilla","section":"cabecalho","message":"Olá, Camilla! Conheci seu trabalho pelo site e gostaria de entender como você pode me ajudar na escolha de um imóvel."},
+ "hero":{"label":"Quero encontrar meu imóvel","section":"inicio","message":"Olá, Camilla! Vi seu site e estou procurando um imóvel para morar. Gostaria de conversar sobre minhas prioridades e conhecer sua curadoria imobiliária."},
+ "about":{"label":"Conversar sobre minha busca","section":"sobre","message":"Olá, Camilla! Conheci sua proposta de unir arquitetura e curadoria imobiliária. Gostaria de contar o que procuro para meu próximo imóvel."},
+ "difference":{"label":"Quero avaliar minhas opções","section":"diferencial","message":"Olá, Camilla! Gostaria de contar com seu olhar de arquiteta para avaliar as opções de imóveis que estou considerando. Podemos conversar?"},
+ "contact":{"label":"Iniciar conversa no WhatsApp","section":"contato","message":"Olá, Camilla! Vim pelo seu site e gostaria de iniciar um atendimento. Podemos conversar sobre o que estou procurando?"},
+ "floating":{"label":"WhatsApp","section":"flutuante","message":"Olá, Camilla! Estou no seu site e gostaria de falar com você."}
+}

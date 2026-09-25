@@ -1,0 +1,5 @@
+[
+ {"id":"curadoria","name":"Curadoria imobiliária","description":"Seleção e orientação considerando suas prioridades, sua rotina e as características de cada imóvel.","cta":"Quero uma curadoria","message":"Olá, Camilla! Tenho interesse na sua curadoria imobiliária. Gostaria de entender como funciona a seleção de imóveis de acordo com meu perfil."},
+ {"id":"arquitetura","name":"Arquitetura residencial","description":"Uma conversa sobre suas necessidades, o uso dos espaços e as possibilidades de um projeto para morar.","cta":"Quero conversar sobre meu projeto","message":"Olá, Camilla! Vi a seção de arquitetura residencial no seu site e gostaria de conversar sobre um projeto. Você pode me explicar como funciona seu atendimento?"},
+ {"id":"consultoria","name":"Consultoria e acompanhamento","description":"Orientação para comparar opções e organizar suas dúvidas ao longo da escolha do próximo imóvel.","cta":"Quero orientação para escolher","message":"Olá, Camilla! Estou avaliando opções de imóveis e gostaria de entender como funciona sua consultoria e acompanhamento para essa escolha."}
+]
