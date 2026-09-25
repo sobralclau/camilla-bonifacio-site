@@ -38,10 +38,13 @@
 .difference{background:#080808}
 .difference-logo{width:min(520px,60%);height:auto;margin:0 0 72px}
 .contact{padding-block:0;background:var(--terra);color:var(--paper);text-align:center}
-.contact-inner{padding-block:78px 86px}
-.contact-logo{width:min(470px,86%);height:auto;margin:0 auto 48px}
+.contact-inner{max-width:900px;margin:0 auto;padding-block:72px 86px;display:flex;flex-direction:column;align-items:center}
+.contact-logo{display:block;width:min(470px,86%);height:auto;margin:0 auto 42px}
 .contact .eyebrow,.contact>p,.contact-inner>p:not(.eyebrow){color:var(--paper)}
-.contact .phone{color:var(--paper)}
+.contact h2{max-width:760px;margin:0 auto;text-align:center}
+.contact-inner>p:not(.eyebrow){max-width:700px;margin:18px auto 28px;text-align:center}
+.contact .button,.contact .button--light{margin:0 auto}
+.contact .phone{color:var(--paper);margin:20px auto 0;width:fit-content;text-align:center}
 .button--light{background:var(--paper);color:var(--terra-text);border-color:var(--paper)}
 .button--light:hover{background:white;color:var(--ink)}
 .footer{background:#080808;color:var(--paper);border-top:1px solid #3d342f}
@@ -66,7 +69,7 @@
  .hero-visual{grid-template-columns:minmax(0,1fr) 82px}.hero-portrait{padding:8px}.hero-manifesto{padding:16px 9px;gap:9px;font-size:8px;letter-spacing:.09em}.hero-manifesto span:last-child{padding-top:12px}
  .about{padding-block:58px}.about .section-copy{padding:48px 28px 54px}.about .section-copy h2{font-size:42px}.about-mark{width:210px;right:-45px;bottom:-30px}
  .difference-logo{width:100%;margin-bottom:42px}
- .contact-inner{padding-block:58px 64px}.contact-logo{width:96%;margin-bottom:38px}.contact h2{font-size:44px}
+ .contact-inner{padding-block:58px 64px;max-width:100%}.contact-logo{width:96%;margin:0 auto 34px}.contact h2{font-size:44px;max-width:100%}.contact-inner>p:not(.eyebrow){margin:16px auto 24px;max-width:100%}
  .footer .brand{width:255px;max-width:100%}
 }
 
