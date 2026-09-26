@@ -154,3 +154,24 @@
 @media(max-width:1000px){.knowledge-cluster{grid-template-columns:minmax(280px,.78fr) minmax(0,1.22fr);gap:42px}.knowledge-cluster-head h3{font-size:38px}}
 @media(max-width:820px){.knowledge-heading{align-items:start}.knowledge-cluster{grid-template-columns:1fr;gap:28px}.knowledge-cluster-head{max-width:680px}.knowledge-cluster-head h3{max-width:none}.knowledge-clusters{gap:46px}}
 @media(max-width:600px){.knowledge-heading{margin-bottom:40px}.knowledge-kicker{font-size:20px}.knowledge-cluster{gap:22px;padding-top:30px}.knowledge-cluster-head{grid-template-columns:26px minmax(0,1fr);gap:12px}.knowledge-cluster-head h3{font-size:34px;line-height:1.06}.knowledge-item summary{font-size:13px;gap:16px;padding:18px 0;min-height:60px}.knowledge-answer{padding:0 0 22px}.knowledge-answer p{font-size:13px;line-height:1.78}}
+
+/* Capa final: fotografia integral conforme composição aprovada no dossiê */
+.hero-visual{grid-template-columns:minmax(0,1fr) 126px;min-height:560px;overflow:hidden;background:#d8c7b8;align-items:stretch}
+.hero-visual::before{content:none}
+.hero-portrait{align-self:stretch;justify-self:stretch;width:100%;height:100%;aspect-ratio:auto;border-radius:0;overflow:hidden;padding:0;margin:0;background:#d8c7b8;position:relative}
+.hero-portrait::before,.hero-portrait::after{content:none}
+.hero-portrait img{position:relative;z-index:1;width:100%;height:100%;min-height:560px;object-fit:cover;object-position:center 43%;border-radius:0;box-shadow:none}
+.hero-manifesto{min-width:0;padding:34px 18px;justify-content:center}
+@media(max-width:1000px){
+ .hero-visual{grid-template-columns:minmax(0,1fr) 104px;min-height:500px}
+ .hero-portrait img{min-height:500px;object-position:center 42%}
+}
+@media(max-width:820px){
+ .hero-visual{grid-template-columns:minmax(0,1fr) 96px;min-height:520px}
+ .hero-portrait img{min-height:520px;object-position:center 40%}
+}
+@media(max-width:600px){
+ .hero-visual{grid-template-columns:minmax(0,1fr) 76px;min-height:430px}
+ .hero-portrait img{min-height:430px;object-position:center 38%}
+ .hero-manifesto{padding:18px 8px}
+}
