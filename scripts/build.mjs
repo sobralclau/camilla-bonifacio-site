@@ -23,8 +23,11 @@ for (const type of Object.keys(groups)) {
 await rm('dist',{recursive:true,force:true});await mkdir('dist',{recursive:true});await cp('public','dist',{recursive:true});
 await Promise.all(['styles.css','app.js'].map(f=>cp(`src/${f}`,`dist/${f}`)));
 const ctx={site,ctas,services,guides,collections};
-const title='Camilla Bonifácio | Arquitetura e Curadoria Imobiliária';
-const description='Um olhar de arquiteta para escolher seu próximo imóvel. Conheça a curadoria imobiliária, a arquitetura residencial e a consultoria de Camilla Bonifácio.';
+const title='Camilla Bonifácio | Arquiteta e Curadoria Imobiliária em João Pessoa';
+const description='Camilla Bonifácio é arquiteta e corretora de imóveis em João Pessoa e Cabedelo. Curadoria imobiliária, arquitetura residencial e orientação para escolher melhor onde morar.';
+const personId=site.siteUrl?site.siteUrl+'/#camilla-bonifacio':undefined;
+const places=(site.areaServed||[]).map(name=>({'@type':name==='Paraíba'?'AdministrativeArea':'City',name}));
+const breadcrumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map((item,index)=>({'@type':'ListItem',position:index+1,name:item.name,...(item.url?{item:item.url}:{})}))});
 await writeFile('dist/index.html',layout({...ctx,body:homeBody(ctx),title,description,canonical:site.siteUrl?site.siteUrl+'/':''}));
 const routes=['/'];
 for (const guide of guides) {
@@ -34,10 +37,12 @@ for (const guide of guides) {
  const route=`/${base}/${guide.id}/`;
  routes.push(route);
  await mkdir('dist'+route,{recursive:true});
- await writeFile('dist'+route+'index.html',layout({...ctx,body:guideBody(guide),title:`${guide.title} | Camilla Bonifácio`,description:guide.intro,canonical:site.siteUrl?site.siteUrl+route:'',prefix:'../../',home:'../../'}));
+ const canonical=site.siteUrl?site.siteUrl+route:'';
+ const schema=[breadcrumb([{name:'Início',url:site.siteUrl?site.siteUrl+'/':undefined},{name:guide.kind==='service'?'Serviços':'Critérios',url:site.siteUrl?site.siteUrl+'/#'+(guide.kind==='service'?'servicos':'diferencial'):undefined},{name:guide.title,url:canonical||undefined}]),guide.kind==='service'?{'@type':'Service',name:guide.title,description:guide.intro,provider:personId?{'@id':personId}:{'@type':'Person',name:site.name},areaServed:places}: {'@type':'WebPage',name:guide.title,description:guide.intro,about:personId?{'@id':personId}:undefined}];
+ await writeFile('dist'+route+'index.html',layout({...ctx,body:guideBody(guide),title:`${guide.title} | Camilla Bonifácio`,description:guide.intro,canonical,prefix:'../../',home:'../../',schema}));
 }
-for(const [type,items]of Object.entries(collections))for(const item of items){const route=`/${groups[type].slug}/${item.id}/`;routes.push(route);await mkdir('dist'+route,{recursive:true});await writeFile('dist'+route+'index.html',layout({...ctx,body:detailBody(type,item),title:`${item.title||item.name} | Camilla Bonifácio`,description:item.body[0],canonical:site.siteUrl?site.siteUrl+route:'',prefix:'../../',home:'../../'}));}
-if(site.siteUrl){await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(r=>`<url><loc>${esc(site.siteUrl+r)}</loc></url>`).join('')}</urlset>`);await writeFile('dist/robots.txt',`User-agent: *\nAllow: /\nSitemap: ${site.siteUrl}/sitemap.xml\n`);}
+for(const [type,items]of Object.entries(collections))for(const item of items){const route=`/${groups[type].slug}/${item.id}/`;routes.push(route);await mkdir('dist'+route,{recursive:true});const canonical=site.siteUrl?site.siteUrl+route:'';const schema=[breadcrumb([{name:'Início',url:site.siteUrl?site.siteUrl+'/':undefined},{name:groups[type].label,url:site.siteUrl?site.siteUrl+'/#'+groups[type].slug:undefined},{name:item.title||item.name,url:canonical||undefined}])];await writeFile('dist'+route+'index.html',layout({...ctx,body:detailBody(type,item),title:`${item.title||item.name} | Camilla Bonifácio`,description:item.body[0],canonical,prefix:'../../',home:'../../',schema}));}
+if(site.siteUrl){const lastmod=new Date().toISOString().slice(0,10);await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(r=>`<url><loc>${esc(site.siteUrl+r)}</loc><lastmod>${lastmod}</lastmod></url>`).join('')}</urlset>`);await writeFile('dist/robots.txt',`User-agent: *\nAllow: /\nSitemap: ${site.siteUrl}/sitemap.xml\n`);}
 else await writeFile('dist/robots.txt','User-agent: *\nAllow: /\n');
 await mkdir('docs',{recursive:true});
 const map=[...Object.entries(ctas).map(([id,x])=>({id,...x})),...services.map(s=>({id:'service-'+s.id,label:s.cta,section:'servicos',message:s.message})),...guides.map(g=>({id:'guide-'+g.id,label:g.ctaLabel,section:g.kind==='service'?'servicos':'criterios',message:g.message}))];

@@ -48,6 +48,25 @@ O cabeçalho, as seções terracota e preta, o contato, o rodapé e o favicon us
 
 A imagem Open Graph é uma cópia da fotografia autorizada de blazer, sem alteração. Título e descrição acompanham a imagem nos metadados. URLs absolutas, canonical, sitemap e `og:image` são inseridos somente quando `SITE_URL` é configurado. A ausência de domínio não gera endereços fictícios.
 
+## SEO, GEO e AIO
+
+A estrutura de busca foi preparada para descoberta orgânica tradicional e para recursos generativos de pesquisa sem depender de truques específicos de IA. O build inclui:
+
+- título e descrição com contexto de João Pessoa e Cabedelo;
+- conteúdo visível que identifica Camilla como arquiteta e corretora de imóveis;
+- JSON-LD com WebSite, Person, WebPage, Service e BreadcrumbList quando aplicável;
+- tópicos de autoridade em arquitetura residencial, curadoria imobiliária, leitura de plantas, iluminação, ventilação e escolha de imóveis para moradia;
+- canonical e hreflang quando SITE_URL estiver configurado;
+- Open Graph e Twitter Card;
+- robots com snippets amplos e preview de imagens;
+- sitemap com lastmod quando SITE_URL estiver configurado;
+- conteúdo semântico e páginas estáticas pré-renderizadas, facilitando rastreamento sem depender de JavaScript;
+- headers de segurança servidos pelo Cloudflare através de public/_headers.
+
+Não foi criado llms.txt ou arquivo semelhante porque ele não é requisito para Google AI Overviews ou AI Mode. A estratégia de AIO/GEO continua baseada em conteúdo útil, rastreável, semanticamente claro e associado à entidade Camilla Bonifácio.
+
+No Cloudflare, habilitar Crawler Hints na zona do domínio após o domínio definitivo estar ativo. Esse recurso usa sinais de cache e IndexNow para avisar mecanismos compatíveis quando páginas mudam. A configuração é feita no painel da zona e não pelo código do repositório.
+
 ## GitHub e Cloudflare Workers
 
 O repositório remoto está na branch `main` e o deploy é feito pela integração do GitHub com Cloudflare Workers.

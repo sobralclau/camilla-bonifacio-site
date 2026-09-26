@@ -4,6 +4,11 @@ import {createWhatsAppUrl,itemMessage} from '../src/whatsapp.mjs';
 const html=await readFile('dist/index.html','utf8');
 assert.equal((html.match(/<h1\b/g)||[]).length,1);
 assert(html.includes('lang="pt-BR"'));
+assert(html.includes('name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"'));
+assert(html.includes('João Pessoa e Cabedelo'));
+const schemas=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+assert(schemas.length>0,'JSON-LD ausente.');
+const graph=schemas.flatMap(x=>x['@graph']||[]);assert(graph.some(x=>x['@type']==='Person'&&x.name==='Camilla Bonifácio'));assert(graph.some(x=>x['@type']==='WebSite'));assert(graph.some(x=>x['@type']==='WebPage'));
 assert(!/[\u2013\u2014]/.test(html),'Travessões no conteúdo.');
 assert(!/São Paulo|DDD 11|CRECI|99944|lojaminhakasa|camillabonifacio\.arq/.test(html));
 const ctas=JSON.parse(await readFile('data/ctas.json','utf8'));
@@ -22,4 +27,4 @@ assert.throws(()=>createWhatsAppUrl('Olá {nome}'));assert.throws(()=>createWhat
 const relativeLuminance=hex=>{const rgb=hex.match(/\w\w/g).map(h=>parseInt(h,16)/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722};
 const contrast=(a,b)=>{const x=relativeLuminance(a),y=relativeLuminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
 for(const [a,b]of [['854D37','F6EFE6'],['2F2F2F','F6EFE6'],['61584f','F6EFE6'],['61584f','eee4d9'],['854D37','eee4d9'],['D7C3B1','2F2F2F']]){const ratio=contrast(a,b);assert(ratio>=4.5,`Contraste insuficiente ${a}/${b}: ${ratio}`);console.log(`Contraste ${a}/${b}: ${ratio.toFixed(2)}:1`);}
-console.log('Verificados: 9 CTAs, mensagens, acentos, âncoras, assets, fontes, contraste e coleções vazias.');
+console.log('Verificados: CTAs, mensagens, SEO local, JSON-LD, acentos, âncoras, assets, fontes, contraste e coleções vazias.');
