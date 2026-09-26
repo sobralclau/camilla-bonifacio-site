@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir, rm, cp, access } from 'node:fs/promises';
 import path from 'node:path';
-import { layout, homeBody, detailBody, guideBody, groups, esc } from '../src/templates.mjs';
+import { layout, homeBody, detailBody, guideBody, groups, esc, knowledgeClusters } from '../src/templates.mjs';
 import { WHATSAPP_NUMBER } from '../src/whatsapp.mjs';
 const read = async name => JSON.parse(await readFile(`data/${name}.json`,'utf8'));
 const [site,ctas,services,guides] = await Promise.all(['site','ctas','services','guides'].map(read));
@@ -28,7 +28,8 @@ const description='Camilla Bonifácio é arquiteta e corretora de imóveis em Jo
 const personId=site.siteUrl?site.siteUrl+'/#camilla-bonifacio':undefined;
 const places=(site.areaServed||[]).map(name=>({'@type':name==='Paraíba'?'AdministrativeArea':'City',name}));
 const breadcrumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map((item,index)=>({'@type':'ListItem',position:index+1,name:item.name,...(item.url?{item:item.url}:{})}))});
-await writeFile('dist/index.html',layout({...ctx,body:homeBody(ctx),title,description,canonical:site.siteUrl?site.siteUrl+'/':''}));
+const homeFaq={'@type':'FAQPage',mainEntity:knowledgeClusters.flatMap(cluster=>cluster.items.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}})))};
+await writeFile('dist/index.html',layout({...ctx,body:homeBody(ctx),title,description,canonical:site.siteUrl?site.siteUrl+'/':'',schema:[homeFaq]}));
 const routes=['/'];
 for (const guide of guides) {
  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(guide.id) || !['service','criterion'].includes(guide.kind)) throw Error(`guides/${guide.id}: dados inválidos.`);
