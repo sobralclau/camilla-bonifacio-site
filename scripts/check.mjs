@@ -10,6 +10,8 @@ assert(html.includes('id="guia"'));
 assert.equal((html.match(/<details class="knowledge-item"/g)||[]).length,14);
 assert(html.includes('Como avaliar uma planta antes de comprar?'));
 assert(html.includes('Como avaliar os bairros de João Pessoa?'));
+assert(html.includes('src="./assets/images/social-preview.jpg"'));
+assert(!html.includes('camilla-blazer-863.webp'));
 const schemas=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
 assert(schemas.length>0,'JSON-LD ausente.');
 const graph=schemas.flatMap(x=>x['@graph']||[]);assert(graph.some(x=>x['@type']==='Person'&&x.name==='Camilla Bonifácio'));assert(graph.some(x=>x['@type']==='WebSite'));assert(graph.some(x=>x['@type']==='WebPage'));assert(graph.some(x=>x['@type']==='FAQPage'&&x.mainEntity?.length===14));
