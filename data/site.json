@@ -4,7 +4,11 @@
  "whatsappNumber": "5583999318581",
  "phoneDisplay": "+55 83 99931-8581",
  "siteUrl": "",
- "areaServed": "",
+ "areaServed": [
+  "João Pessoa",
+  "Cabedelo",
+  "Paraíba"
+ ],
  "socialLinks": [],
  "professionalRegistrations": [],
  "analytics": {
@@ -14,5 +18,20 @@
   "name": "Cláudio Sobral",
   "handle": "@claudiosobralmkt",
   "url": "https://www.instagram.com/claudiosobralmkt"
- }
+ },
+ "geo": {
+  "region": "BR-PB",
+  "locality": "João Pessoa",
+  "country": "BR"
+ },
+ "knowledgeTopics": [
+  "arquitetura residencial",
+  "curadoria imobiliária",
+  "compra de imóveis para moradia",
+  "leitura de plantas",
+  "funcionalidade dos espaços",
+  "iluminação e ventilação natural",
+  "imóveis em João Pessoa",
+  "imóveis em Cabedelo"
+ ]
 }
