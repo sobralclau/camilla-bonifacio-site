@@ -23,7 +23,7 @@ const baseGraph = (site,title,description,canonical) => {
  const personId=site.siteUrl?site.siteUrl+'/#camilla-bonifacio':undefined;
  const graph=[
   compact({'@type':'WebSite','@id':site.siteUrl?site.siteUrl+'/#website':undefined,url:site.siteUrl||undefined,name:site.name,inLanguage:'pt-BR',description:'Site oficial de Camilla Bonifácio, arquiteta e corretora de imóveis com atuação em João Pessoa e Cabedelo.'}),
-  compact({'@type':'Person','@id':personId,url:site.siteUrl||undefined,name:site.name,jobTitle:'Arquiteta e corretora de imóveis',description:'Arquitetura e curadoria imobiliária para escolhas de moradia mais conscientes em João Pessoa e Cabedelo, Paraíba.',areaServed:areaSchema(site),knowsAbout:site.knowledgeTopics||[],sameAs:site.socialLinks||[]}),
+  compact({'@type':'Person','@id':personId,url:site.siteUrl||undefined,name:site.name,jobTitle:'Arquiteta e corretora de imóveis',description:'Arquitetura e curadoria imobiliária para escolhas de moradia mais conscientes em João Pessoa e Cabedelo, Paraíba.',workLocation:areaSchema(site),knowsAbout:site.knowledgeTopics||[],sameAs:site.socialLinks||[]}),
   compact({'@type':'WebPage','@id':url?url+'#webpage':undefined,url,name:title,description,inLanguage:'pt-BR',isPartOf:site.siteUrl?{'@id':site.siteUrl+'/#website'}:undefined,about:personId?{'@id':personId}:undefined})
  ];
  return graph;
