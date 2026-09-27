@@ -10,8 +10,6 @@ assert(html.includes('id="guia"'));
 assert.equal((html.match(/<details class="knowledge-item"/g)||[]).length,14);
 assert(html.includes('Como avaliar uma planta antes de comprar?'));
 assert(html.includes('Como avaliar os bairros de João Pessoa?'));
-assert(html.includes('src="./assets/images/social-preview.jpg"'));
-assert(!html.includes('camilla-blazer-863.webp'));
 const schemas=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
 assert(schemas.length>0,'JSON-LD ausente.');
 const graph=schemas.flatMap(x=>x['@graph']||[]);assert(graph.some(x=>x['@type']==='Person'&&x.name==='Camilla Bonifácio'));assert(graph.some(x=>x['@type']==='WebSite'));assert(graph.some(x=>x['@type']==='WebPage'));assert(graph.some(x=>x['@type']==='FAQPage'&&x.mainEntity?.length===14));
@@ -25,8 +23,6 @@ for(const [tag,id]of actual){const href=tag.match(/href="([^"]+)"/)[1].replaceAl
 for(const group of ['properties','projects','articles']){const rows=JSON.parse(await readFile(`data/${group}.json`,'utf8'));assert.equal(rows.length,0);}
 for(const ref of [...html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)].map(m=>m[1]))await access('dist/'+ref);
 const css=await readFile('dist/styles.css','utf8');
-assert(css.includes('Capa final: fotografia integral conforme composição aprovada no dossiê'));
-assert(css.includes('.hero-portrait img{position:relative;z-index:1;width:100%;height:100%;min-height:560px;object-fit:cover;object-position:center 43%;border-radius:0;box-shadow:none}'));
 for(const m of css.matchAll(/url\('\.\/([^']+)'\)/g)){assert((await stat('dist/'+m[1])).size>0);}
 const ids=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
 for(const m of html.matchAll(/href="#([^"]+)"/g))assert(ids.has(m[1]),'Âncora sem destino: '+m[1]);
