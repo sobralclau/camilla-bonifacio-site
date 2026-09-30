@@ -26,7 +26,7 @@ if (document.documentElement.dataset.analytics === 'true') {
 }
 
 
-const LEAD_API='https://chave-nova-site.cloudsobral.workers.dev/api/camilla-leads';
+const LEAD_API='/api/leads';
 const leadModal=document.querySelector('#lead-modal');
 const leadForm=document.querySelector('#lead-capture-form');
 const leadStatus=document.querySelector('#lead-status');
