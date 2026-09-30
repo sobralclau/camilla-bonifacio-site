@@ -13,6 +13,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && toggle?.ge
 document.addEventListener('click', e => { if (!e.target.closest('.header-inner')) setMenu(false); });
 nav?.addEventListener('focusout', () => { setTimeout(() => { if (!nav.contains(document.activeElement) && document.activeElement !== toggle) setMenu(false); }, 0); });
 matchMedia('(min-width:821px)').addEventListener('change', () => setMenu(false));
+
 // Optional adapter. No tracking SDK, cookies or identifiers are loaded by this site.
 // Configure window.siteAnalytics = (eventName, payload) => ... only after privacy review.
 if (document.documentElement.dataset.analytics === 'true') {
@@ -25,12 +26,11 @@ if (document.documentElement.dataset.analytics === 'true') {
   });
 }
 
-
 const LEAD_API='/api/leads';
 const leadModal=document.querySelector('#lead-modal');
 const leadForm=document.querySelector('#lead-capture-form');
 const leadStatus=document.querySelector('#lead-status');
-let pendingLead={message:'',ctaId:'',section:'',itemId:'',fallbackUrl:''};
+let pendingLead={message:'',ctaId:'',section:'',itemId:'',fallbackUrl:'',auto:false};
 
 function leadDigits(v){return String(v||'').replace(/\D/g,'')}
 function formatLeadPhone(v){
@@ -40,19 +40,32 @@ function formatLeadPhone(v){
   if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
   return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
 }
-function openLeadModal(link){
-  pendingLead={
+function openLeadModal(link=null,{auto=false}={}){
+  pendingLead=link ? {
     message:link.dataset.leadMessage||'Olá, Camilla! Vim pelo seu site e gostaria de iniciar um atendimento.',
     ctaId:link.dataset.ctaId||'site',
     section:link.dataset.section||'site',
     itemId:link.dataset.itemId||'',
-    fallbackUrl:link.href
+    fallbackUrl:link.href,
+    auto:false
+  } : {
+    message:'',
+    ctaId:'popup_5s',
+    section:'captacao_modal',
+    itemId:'popup',
+    fallbackUrl:'',
+    auto:true
   };
-  if(!leadModal){ location.href=link.href; return; }
+  if(!leadModal){
+    if(link) location.href=link.href;
+    return;
+  }
   leadModal.classList.add('is-open');
   leadModal.setAttribute('aria-hidden','false');
   document.body.classList.add('lead-modal-open');
   leadStatus.textContent='';
+  const sector=leadForm?.elements.sector;
+  if(sector && auto) sector.value='';
   setTimeout(()=>leadForm?.elements.name?.focus(),50);
 }
 function closeLeadModal(){
@@ -68,12 +81,38 @@ document.querySelectorAll('[data-lead-close]').forEach(el=>el.addEventListener('
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&leadModal?.classList.contains('is-open'))closeLeadModal();});
 leadForm?.elements.phone?.addEventListener('input',e=>{e.target.value=formatLeadPhone(e.target.value);});
 
-function openLeadWhatsApp(name){
-  const context=pendingLead.message;
-  const msg=[
-    context,
+if(leadModal && !sessionStorage.getItem('camilla_lead_popup_shown')){
+  window.setTimeout(()=>{
+    if(!leadModal.classList.contains('is-open')){
+      sessionStorage.setItem('camilla_lead_popup_shown','1');
+      openLeadModal(null,{auto:true});
+    }
+  },5000);
+}
+
+function sectorData(sector,name){
+  if(sector==='arquitetura'){
+    return {
+      section:'arquitetura',
+      source:'popup_arquitetura',
+      context:'Atendimento consultivo de arquitetura',
+      message:'Olá, Camilla! Vim pelo seu site e gostaria de um atendimento consultivo de arquitetura. Meu nome é '+name+'. Quero conversar sobre meu projeto e entender como você pode me orientar.'
+    };
+  }
+  return {
+    section:'curadoria_imobiliaria',
+    source:'popup_curadoria_imobiliaria',
+    context:'Curadoria imobiliária exclusiva',
+    message:'Olá, Camilla! Vim pelo seu site e gostaria de uma curadoria imobiliária exclusiva. Meu nome é '+name+'. Quero receber orientação para encontrar um imóvel alinhado ao meu perfil, rotina e objetivos.'
+  };
+}
+function openLeadWhatsApp(name,sector){
+  const chosen=sectorData(sector,name);
+  const baseContext=pendingLead.message && !pendingLead.auto ? pendingLead.message : chosen.message;
+  const msg=pendingLead.auto ? chosen.message : [
+    baseContext,
     '',
-    'Meu nome é '+name+'. Preenchi meus dados no site para dar continuidade ao atendimento.'
+    'Meu nome é '+name+'. Meu interesse principal é '+chosen.context.toLowerCase()+'. Preenchi meus dados no site para dar continuidade ao atendimento.'
   ].join('\n');
   window.location.href='https://wa.me/5583999318581?text='+encodeURIComponent(msg);
 }
@@ -81,18 +120,21 @@ leadForm?.addEventListener('submit',async e=>{
   e.preventDefault();
   const name=String(leadForm.elements.name.value||'').trim();
   const phone=leadDigits(leadForm.elements.phone.value);
+  const sector=String(leadForm.elements.sector.value||'').trim();
   const consent=leadForm.elements.consent.checked;
   if(name.length<2){leadStatus.textContent='Informe seu nome para continuar.';leadForm.elements.name.focus();return;}
   if(phone.length<10){leadStatus.textContent='Confira o WhatsApp informado.';leadForm.elements.phone.focus();return;}
+  if(!sector){leadStatus.textContent='Escolha o tipo de atendimento desejado.';leadForm.elements.sector.focus();return;}
   if(!consent){leadStatus.textContent='Confirme a autorização para continuar.';leadForm.elements.consent.focus();return;}
+  const chosen=sectorData(sector,name);
   const submit=leadForm.querySelector('button[type="submit"]');
   submit.disabled=true;submit.textContent='Registrando...';leadStatus.textContent='Registrando seu contato...';
   const payload={
     name,phone,
     cta_id:pendingLead.ctaId,
-    section:pendingLead.section,
-    context:pendingLead.message,
-    source:pendingLead.itemId?('site_'+pendingLead.itemId):'site_camilla',
+    section:chosen.section,
+    context:pendingLead.message && !pendingLead.auto ? pendingLead.message+' | Interesse: '+chosen.context : chosen.context,
+    source:pendingLead.auto ? chosen.source : (pendingLead.itemId?('site_'+pendingLead.itemId):'site_camilla'),
     page:location.href,
     referrer:document.referrer
   };
@@ -104,6 +146,6 @@ leadForm?.addEventListener('submit',async e=>{
     leadStatus.textContent='Abrindo o WhatsApp para continuar o atendimento...';
   }finally{
     submit.disabled=false;submit.textContent='Continuar no WhatsApp';
-    openLeadWhatsApp(name);
+    openLeadWhatsApp(name,sector);
   }
 });
