@@ -180,3 +180,14 @@ body.lead-modal-open{overflow:hidden}
   .lead-dialog{border-radius:22px 22px 14px 14px;padding:28px 20px 22px}
   .lead-dialog h2{font-size:2.1rem}
 }
+
+
+/* Popup de captação segmentada */
+.lead-brand{display:block;width:min(100%,260px);height:auto;margin:0 0 22px}
+#lead-capture-form select{width:100%;height:52px;border:1px solid #D7C3B1;border-radius:12px;background:#fff;color:#2F2F2F;padding:0 42px 0 14px;font:inherit;font-size:15px;outline:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,#A8694E 50%),linear-gradient(135deg,#A8694E 50%,transparent 50%);background-position:calc(100% - 19px) 22px,calc(100% - 14px) 22px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+#lead-capture-form select:focus{border-color:#A8694E;box-shadow:0 0 0 3px rgba(168,105,78,.12)}
+#lead-capture-form select:invalid{color:#756a63}
+@media(max-width:600px){
+  .lead-brand{width:min(100%,220px);margin-bottom:18px}
+  #lead-capture-form select{font-size:16px}
+}
