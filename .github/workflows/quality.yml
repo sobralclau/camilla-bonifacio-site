@@ -1,4 +1,4 @@
-name: Quality and Deploy
+name: Quality
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: camilla-production-${{ github.ref }}
+  group: camilla-quality-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,23 +31,3 @@ jobs:
           SITE_URL: https://example.com
 
       - run: npm run check
-
-  deploy-production:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build-and-check
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      - name: Deploy to Cloudflare Workers
-        run: npx --yes wrangler@4.44.0 deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
