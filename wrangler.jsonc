@@ -1,8 +1,21 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "camilla-bonifacio-site",
-  "compatibility_date": "2026-09-25",
+  "main": "./src/worker.js",
+  "compatibility_date": "2026-09-30",
   "assets": {
-    "directory": "./dist"
-  }
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*",
+      "/admin/*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chave-nova-leads",
+      "database_id": "a69281cc-58be-4c7b-b21b-8a6f0233b5a6"
+    }
+  ]
 }
