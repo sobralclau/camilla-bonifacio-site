@@ -69,6 +69,8 @@ No Cloudflare, habilitar Crawler Hints na zona do domínio após o domínio defi
 
 ## GitHub e Cloudflare Workers
 
+Deploy automático: qualquer alteração na branch `main` é inspecionada pela integração nativa da Cloudflare, que executa o build e publica o Worker.
+
 O repositório remoto está na branch `main` e o deploy é feito pela integração do GitHub com Cloudflare Workers.
 
 Configuração de produção:
