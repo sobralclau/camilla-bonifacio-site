@@ -14,7 +14,8 @@ const schemas=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)
 assert(schemas.length>0,'JSON-LD ausente.');
 const graph=schemas.flatMap(x=>x['@graph']||[]);assert(graph.some(x=>x['@type']==='Person'&&x.name==='Camilla Bonifácio'));assert(graph.some(x=>x['@type']==='WebSite'));assert(graph.some(x=>x['@type']==='WebPage'));assert(graph.some(x=>x['@type']==='FAQPage'&&x.mainEntity?.length===14));
 assert(!/[\u2013\u2014]/.test(html),'Travessões no conteúdo.');
-assert(!/São Paulo|DDD 11|CRECI|99944|lojaminhakasa|camillabonifacio\.arq/.test(html));
+assert(!/São Paulo|DDD 11|99944|lojaminhakasa|camillabonifacio\.arq/.test(html));
+assert(html.includes('CRECI-PB 15700'),'CRECI-PB 15700 ausente da página principal.');
 const ctas=JSON.parse(await readFile('data/ctas.json','utf8'));
 const services=JSON.parse(await readFile('data/services.json','utf8'));
 const expected={...Object.fromEntries(Object.entries(ctas).map(([id,x])=>[id,x.message])),...Object.fromEntries(services.map(s=>['service-'+s.id,s.message]))};
