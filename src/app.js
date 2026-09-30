@@ -24,3 +24,86 @@ if (document.documentElement.dataset.analytics === 'true') {
     try { window.siteAnalytics('whatsapp_click', payload); } catch { /* Navigation remains native. */ }
   });
 }
+
+
+const LEAD_API='https://chave-nova-site.cloudsobral.workers.dev/api/camilla-leads';
+const leadModal=document.querySelector('#lead-modal');
+const leadForm=document.querySelector('#lead-capture-form');
+const leadStatus=document.querySelector('#lead-status');
+let pendingLead={message:'',ctaId:'',section:'',itemId:'',fallbackUrl:''};
+
+function leadDigits(v){return String(v||'').replace(/\D/g,'')}
+function formatLeadPhone(v){
+  const d=leadDigits(v).slice(0,11);
+  if(d.length<=2)return d;
+  if(d.length<=6)return '('+d.slice(0,2)+') '+d.slice(2);
+  if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+  return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
+}
+function openLeadModal(link){
+  pendingLead={
+    message:link.dataset.leadMessage||'Olá, Camilla! Vim pelo seu site e gostaria de iniciar um atendimento.',
+    ctaId:link.dataset.ctaId||'site',
+    section:link.dataset.section||'site',
+    itemId:link.dataset.itemId||'',
+    fallbackUrl:link.href
+  };
+  if(!leadModal){ location.href=link.href; return; }
+  leadModal.classList.add('is-open');
+  leadModal.setAttribute('aria-hidden','false');
+  document.body.classList.add('lead-modal-open');
+  leadStatus.textContent='';
+  setTimeout(()=>leadForm?.elements.name?.focus(),50);
+}
+function closeLeadModal(){
+  if(!leadModal)return;
+  leadModal.classList.remove('is-open');
+  leadModal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('lead-modal-open');
+}
+document.querySelectorAll('a[data-lead-capture="true"]').forEach(link=>{
+  link.addEventListener('click',e=>{e.preventDefault();openLeadModal(link);});
+});
+document.querySelectorAll('[data-lead-close]').forEach(el=>el.addEventListener('click',closeLeadModal));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&leadModal?.classList.contains('is-open'))closeLeadModal();});
+leadForm?.elements.phone?.addEventListener('input',e=>{e.target.value=formatLeadPhone(e.target.value);});
+
+function openLeadWhatsApp(name){
+  const context=pendingLead.message;
+  const msg=[
+    context,
+    '',
+    'Meu nome é '+name+'. Preenchi meus dados no site para dar continuidade ao atendimento.'
+  ].join('\n');
+  window.location.href='https://wa.me/5583999318581?text='+encodeURIComponent(msg);
+}
+leadForm?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const name=String(leadForm.elements.name.value||'').trim();
+  const phone=leadDigits(leadForm.elements.phone.value);
+  const consent=leadForm.elements.consent.checked;
+  if(name.length<2){leadStatus.textContent='Informe seu nome para continuar.';leadForm.elements.name.focus();return;}
+  if(phone.length<10){leadStatus.textContent='Confira o WhatsApp informado.';leadForm.elements.phone.focus();return;}
+  if(!consent){leadStatus.textContent='Confirme a autorização para continuar.';leadForm.elements.consent.focus();return;}
+  const submit=leadForm.querySelector('button[type="submit"]');
+  submit.disabled=true;submit.textContent='Registrando...';leadStatus.textContent='Registrando seu contato...';
+  const payload={
+    name,phone,
+    cta_id:pendingLead.ctaId,
+    section:pendingLead.section,
+    context:pendingLead.message,
+    source:pendingLead.itemId?('site_'+pendingLead.itemId):'site_camilla',
+    page:location.href,
+    referrer:document.referrer
+  };
+  try{
+    const res=await fetch(LEAD_API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error('SAVE_FAILED');
+    leadStatus.textContent='Contato registrado. Abrindo o WhatsApp...';
+  }catch{
+    leadStatus.textContent='Abrindo o WhatsApp para continuar o atendimento...';
+  }finally{
+    submit.disabled=false;submit.textContent='Continuar no WhatsApp';
+    openLeadWhatsApp(name);
+  }
+});
