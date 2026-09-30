@@ -17,5 +17,8 @@
       "database_name": "camilla-bonifacio-leads",
       "database_id": "31908b1f-05d3-41ad-8dc2-44d0896bf113"
     }
-  ]
+  ],
+  "build": {
+    "command": "npm run build"
+  }
 }
