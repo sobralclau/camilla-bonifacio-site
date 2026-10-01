@@ -89,7 +89,7 @@ return `<section class="container hero" id="inicio" aria-labelledby="hero-title"
     <div class="work-grid">
       <article class="work-card">
         <a class="work-card-media work-card-media--arquitetura" href="https://www.instagram.com/cgarquitetos/" target="_blank" rel="noopener noreferrer" aria-label="Conhecer o trabalho de arquitetura do CG Arquitetos no Instagram">
-          <img src="./assets/images/cg-arquitetos-dupla.jpeg" width="1290" height="1763" alt="Camilla Bonifácio e Giovanna Dias em retrato profissional do CG Arquitetos." loading="lazy" decoding="async">
+          <img src="./assets/images/cg-arquitetos-dupla.webp" width="1290" height="1763" alt="Camilla Bonifácio e Giovanna Dias em retrato profissional do CG Arquitetos." loading="lazy" decoding="async">
           <span class="work-handle">@cgarquitetos</span>
         </a>
         <div class="work-card-copy">
