@@ -41,6 +41,10 @@ function formatLeadPhone(v){
   return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
 }
 function openLeadModal(link=null,{auto=false}={}){
+  if(link){
+    sessionStorage.setItem('camilla_lead_popup_shown','1');
+    stopLeadPopupTriggers();
+  }
   pendingLead=link ? {
     message:link.dataset.leadMessage||'Olá, Camilla! Vim pelo seu site e gostaria de iniciar um atendimento.',
     ctaId:link.dataset.ctaId||'site',
@@ -81,14 +85,58 @@ document.querySelectorAll('[data-lead-close]').forEach(el=>el.addEventListener('
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&leadModal?.classList.contains('is-open'))closeLeadModal();});
 leadForm?.elements.phone?.addEventListener('input',e=>{e.target.value=formatLeadPhone(e.target.value);});
 
-if(leadModal && !sessionStorage.getItem('camilla_lead_popup_shown')){
-  window.setTimeout(()=>{
-    if(!leadModal.classList.contains('is-open')){
-      sessionStorage.setItem('camilla_lead_popup_shown','1');
-      openLeadModal(null,{auto:true});
-    }
-  },5000);
+const LEAD_POPUP_SESSION_KEY='camilla_lead_popup_shown';
+const LEAD_POPUP_DELAY_MS=25000;
+const LEAD_POPUP_SCROLL_RATIO=0.5;
+let leadPopupTimer=null;
+let leadPopupScrollHandler=null;
+let leadPopupExitHandler=null;
+
+function stopLeadPopupTriggers(){
+  if(leadPopupTimer){
+    window.clearTimeout(leadPopupTimer);
+    leadPopupTimer=null;
+  }
+  if(leadPopupScrollHandler){
+    window.removeEventListener('scroll',leadPopupScrollHandler);
+    leadPopupScrollHandler=null;
+  }
+  if(leadPopupExitHandler){
+    document.removeEventListener('mouseout',leadPopupExitHandler);
+    leadPopupExitHandler=null;
+  }
 }
+
+function showAutomaticLeadPopup(){
+  if(!leadModal || sessionStorage.getItem(LEAD_POPUP_SESSION_KEY))return;
+  if(leadModal.classList.contains('is-open'))return;
+  sessionStorage.setItem(LEAD_POPUP_SESSION_KEY,'1');
+  stopLeadPopupTriggers();
+  openLeadModal(null,{auto:true});
+}
+
+function setupAutomaticLeadPopup(){
+  if(!leadModal || sessionStorage.getItem(LEAD_POPUP_SESSION_KEY))return;
+
+  leadPopupTimer=window.setTimeout(showAutomaticLeadPopup,LEAD_POPUP_DELAY_MS);
+
+  leadPopupScrollHandler=()=>{
+    const scrollable=Math.max(document.documentElement.scrollHeight-window.innerHeight,1);
+    const progress=Math.min(window.scrollY/scrollable,1);
+    if(progress>=LEAD_POPUP_SCROLL_RATIO)showAutomaticLeadPopup();
+  };
+  window.addEventListener('scroll',leadPopupScrollHandler,{passive:true});
+
+  const isDesktop=window.matchMedia('(min-width: 821px) and (hover: hover) and (pointer: fine)').matches;
+  if(isDesktop){
+    leadPopupExitHandler=e=>{
+      if(e.relatedTarget===null && e.clientY<=10)showAutomaticLeadPopup();
+    };
+    document.addEventListener('mouseout',leadPopupExitHandler);
+  }
+}
+
+setupAutomaticLeadPopup();
 
 function sectorData(sector,name){
   if(sector==='arquitetura'){
