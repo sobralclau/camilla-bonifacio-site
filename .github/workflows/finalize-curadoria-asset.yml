@@ -1,0 +1,70 @@
+name: Finalize curadoria asset
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/finalize-curadoria-asset.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Assemble and verify WebP
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .tmp/camilla-curadoria.part0.b64 \
+              .tmp/camilla-curadoria.part1.b64 \
+              .tmp/camilla-curadoria.part2.b64 \
+              .tmp/camilla-curadoria.part3.b64 \
+              .tmp/camilla-curadoria.part4.b64 \
+              .tmp/camilla-curadoria.part5.b64 \
+            | tr -d '\n\r' \
+            | base64 --decode \
+            > public/assets/images/camilla-curadoria-sofa.webp
+
+          test "$(head -c 4 public/assets/images/camilla-curadoria-sofa.webp)" = "RIFF"
+          test "$(dd if=public/assets/images/camilla-curadoria-sofa.webp bs=1 skip=8 count=4 2>/dev/null)" = "WEBP"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check
+        run: npm run check
+
+      - name: Verify generated references
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R -F "./assets/images/camilla-curadoria-sofa.webp" dist
+          grep -F ".work-card-media--curadoria img{object-position:50% 40%}" dist/styles.css
+          grep -F ".work-card-media--curadoria img{object-position:50% 38%}" dist/styles.css
+
+      - name: Commit finalized asset and cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .tmp/camilla-curadoria.part*.b64
+          git rm .github/workflows/finalize-curadoria-asset.yml
+          git add public/assets/images/camilla-curadoria-sofa.webp
+          git commit -m "Corrige asset da curadoria imobiliária"
+          git push origin main
