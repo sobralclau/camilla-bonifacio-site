@@ -203,7 +203,7 @@ body.lead-modal-open{overflow:hidden}
 .work-card{background:var(--paper);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
 .work-card-media{position:relative;display:block;overflow:hidden;background:#d8c8b8;text-decoration:none;aspect-ratio:16/10}
 .work-card-media img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;transition:transform .35s ease}
-.work-card-media--arquitetura img{object-position:50% 42%}
+.work-card-media--arquitetura img{object-position:50% 18%}
 .work-card-media--curadoria img{object-position:50% 40%}
 .work-card-media:hover img{transform:scale(1.018)}
 .work-handle{position:absolute;left:22px;bottom:20px;background:rgba(246,239,230,.94);color:var(--ink);border:1px solid rgba(255,255,255,.45);padding:9px 13px;font-size:12px;font-weight:500;line-height:1.2;letter-spacing:.01em;backdrop-filter:blur(8px)}
@@ -232,7 +232,7 @@ body.lead-modal-open{overflow:hidden}
  .work-grid{grid-template-columns:1fr;gap:26px}
  .work-card-media{aspect-ratio:4/3}
  .work-card-media img{object-position:50% 18%}
- .work-card-media--arquitetura img{object-position:50% 38%}
+ .work-card-media--arquitetura img{object-position:50% 20%}
  .work-card-media--curadoria img{object-position:50% 38%}
  .work-handle{left:16px;bottom:15px;padding:8px 11px;font-size:11px}
  .work-card-copy{padding:24px 22px 26px}
