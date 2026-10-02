@@ -10,6 +10,8 @@ assert(html.includes('id="guia"'));
 assert.equal((html.match(/<details class="knowledge-item"/g)||[]).length,14);
 assert(html.includes('Como avaliar uma planta antes de comprar?'));
 assert(html.includes('Como avaliar os bairros de João Pessoa?'));
+assert(html.includes('assets/images/camilla-curadoria-editorial.png'),'Nova imagem da curadoria ausente.');
+assert(!html.includes('camilla-curadoria-sofa.webp'),'Imagem anterior da curadoria ainda referenciada.');
 assert(html.includes('hero--editorial'),'Novo hero editorial ausente.');
 assert(html.includes('assets/images/camilla-curadoria-sofa.webp'),'Nova fotografia da capa ausente.');
 assert(!html.includes('em retrato circular.'),'Hero antigo ainda presente.');
