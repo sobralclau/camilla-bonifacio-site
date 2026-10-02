@@ -11,7 +11,7 @@ assert.equal((html.match(/<details class="knowledge-item"/g)||[]).length,14);
 assert(html.includes('Como avaliar uma planta antes de comprar?'));
 assert(html.includes('Como avaliar os bairros de João Pessoa?'));
 assert(html.includes('hero--editorial'),'Novo hero editorial ausente.');
-assert(html.includes('assets/images/camilla-hero-cover-768.webp'),'Nova fotografia da capa ausente.');
+assert(html.includes('assets/images/camilla-curadoria-sofa.webp'),'Nova fotografia da capa ausente.');
 assert(!html.includes('em retrato circular.'),'Hero antigo ainda presente.');
 const schemas=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
 assert(schemas.length>0,'JSON-LD ausente.');
