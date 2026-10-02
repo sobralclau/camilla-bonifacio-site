@@ -101,7 +101,7 @@ return `<section class="hero hero--editorial" id="inicio" aria-labelledby="hero-
       </article>
       <article class="work-card">
         <a class="work-card-media work-card-media--curadoria" href="https://www.instagram.com/camillambonifacio/" target="_blank" rel="noopener noreferrer" aria-label="Conhecer o trabalho de curadoria imobiliária de Camilla Bonifácio no Instagram">
-          <img src="./assets/images/camilla-curadoria-sofa.webp" width="1536" height="864" alt="Camilla Bonifácio em retrato profissional em ambiente interno." loading="lazy" decoding="async">
+          <img src="./assets/images/camilla-curadoria-nova.webp" width="960" height="600" alt="Camilla Bonifácio em retrato profissional, sentada em poltrona off-white, com composição visual alinhada à identidade da marca." loading="lazy" decoding="async">
           <span class="work-handle">@camillambonifacio</span>
         </a>
         <div class="work-card-copy">
