@@ -42,8 +42,8 @@ function formatLeadPhone(v){
 }
 function openLeadModal(link=null,{auto=false}={}){
   if(link){
-    sessionStorage.setItem('camilla_lead_popup_shown','1');
-    stopLeadPopupTriggers();
+    sessionStorage.setItem(LEAD_CTA_INTERACTED_KEY,'1');
+    stopLeadPopupAutoTriggers();
   }
   pendingLead=link ? {
     message:link.dataset.leadMessage||'Olá, Camilla! Vim pelo seu site e gostaria de iniciar um atendimento.',
@@ -86,13 +86,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&leadModal?.classLis
 leadForm?.elements.phone?.addEventListener('input',e=>{e.target.value=formatLeadPhone(e.target.value);});
 
 const LEAD_POPUP_SESSION_KEY='camilla_lead_popup_shown';
+const LEAD_CTA_INTERACTED_KEY='camilla_lead_cta_interacted';
+const LEAD_DATA_PROVIDED_KEY='camilla_lead_data_provided';
+const LEAD_EXIT_POPUP_SHOWN_KEY='camilla_lead_exit_popup_shown';
 const LEAD_POPUP_DELAY_MS=25000;
-const LEAD_POPUP_SCROLL_RATIO=0.5;
+const LEAD_POPUP_SCROLL_RATIO=0.4;
 let leadPopupTimer=null;
 let leadPopupScrollHandler=null;
 let leadPopupExitHandler=null;
 
-function stopLeadPopupTriggers(){
+function stopLeadPopupAutoTriggers(){
   if(leadPopupTimer){
     window.clearTimeout(leadPopupTimer);
     leadPopupTimer=null;
@@ -101,6 +104,10 @@ function stopLeadPopupTriggers(){
     window.removeEventListener('scroll',leadPopupScrollHandler);
     leadPopupScrollHandler=null;
   }
+}
+
+function stopLeadPopupTriggers(){
+  stopLeadPopupAutoTriggers();
   if(leadPopupExitHandler){
     document.removeEventListener('mouseout',leadPopupExitHandler);
     leadPopupExitHandler=null;
@@ -111,26 +118,33 @@ function showAutomaticLeadPopup(){
   if(!leadModal || sessionStorage.getItem(LEAD_POPUP_SESSION_KEY))return;
   if(leadModal.classList.contains('is-open'))return;
   sessionStorage.setItem(LEAD_POPUP_SESSION_KEY,'1');
-  stopLeadPopupTriggers();
+  stopLeadPopupAutoTriggers();
   openLeadModal(null,{auto:true});
 }
 
 function setupAutomaticLeadPopup(){
-  if(!leadModal || sessionStorage.getItem(LEAD_POPUP_SESSION_KEY))return;
+  if(!leadModal)return;
 
-  leadPopupTimer=window.setTimeout(showAutomaticLeadPopup,LEAD_POPUP_DELAY_MS);
+  if(!sessionStorage.getItem(LEAD_POPUP_SESSION_KEY)){
+    leadPopupTimer=window.setTimeout(showAutomaticLeadPopup,LEAD_POPUP_DELAY_MS);
 
-  leadPopupScrollHandler=()=>{
-    const scrollable=Math.max(document.documentElement.scrollHeight-window.innerHeight,1);
-    const progress=Math.min(window.scrollY/scrollable,1);
-    if(progress>=LEAD_POPUP_SCROLL_RATIO)showAutomaticLeadPopup();
-  };
-  window.addEventListener('scroll',leadPopupScrollHandler,{passive:true});
+    leadPopupScrollHandler=()=>{
+      const scrollable=Math.max(document.documentElement.scrollHeight-window.innerHeight,1);
+      const progress=Math.min(window.scrollY/scrollable,1);
+      if(progress>=LEAD_POPUP_SCROLL_RATIO)showAutomaticLeadPopup();
+    };
+    window.addEventListener('scroll',leadPopupScrollHandler,{passive:true});
+  }
 
   const isDesktop=window.matchMedia('(min-width: 821px) and (hover: hover) and (pointer: fine)').matches;
-  if(isDesktop){
+  if(isDesktop && !sessionStorage.getItem(LEAD_EXIT_POPUP_SHOWN_KEY)){
     leadPopupExitHandler=e=>{
-      if(e.relatedTarget===null && e.clientY<=10)showAutomaticLeadPopup();
+      if(e.relatedTarget!==null || e.clientY>10 || leadModal.classList.contains('is-open'))return;
+      if(!sessionStorage.getItem(LEAD_CTA_INTERACTED_KEY))return;
+      if(sessionStorage.getItem(LEAD_DATA_PROVIDED_KEY))return;
+      sessionStorage.setItem(LEAD_EXIT_POPUP_SHOWN_KEY,'1');
+      stopLeadPopupTriggers();
+      openLeadModal(null,{auto:true});
     };
     document.addEventListener('mouseout',leadPopupExitHandler);
   }
@@ -175,6 +189,8 @@ leadForm?.addEventListener('submit',async e=>{
   if(!sector){leadStatus.textContent='Escolha o tipo de atendimento desejado.';leadForm.elements.sector.focus();return;}
   if(!consent){leadStatus.textContent='Confirme a autorização para continuar.';leadForm.elements.consent.focus();return;}
   const chosen=sectorData(sector,name);
+  sessionStorage.setItem(LEAD_DATA_PROVIDED_KEY,'1');
+  stopLeadPopupTriggers();
   const submit=leadForm.querySelector('button[type="submit"]');
   submit.disabled=true;submit.textContent='Registrando...';leadStatus.textContent='Registrando seu contato...';
   const payload={
