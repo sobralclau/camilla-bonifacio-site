@@ -5,7 +5,7 @@ Destino: +55 83 99931-8581. Cada link abre a mensagem para o visitante revisar e
 | Identificador | Seção | Botão | Mensagem |
 |---|---|---|---|
 | header | cabecalho | Fale com Camilla | Olá, Camilla! Conheci seu trabalho pelo site e gostaria de entender como você pode me ajudar na escolha de um imóvel. |
-| hero | inicio | Quero encontrar meu imóvel | Olá, Camilla! Vi seu site e estou procurando um imóvel para morar. Gostaria de conversar sobre minhas prioridades e conhecer sua curadoria imobiliária. |
+| hero | inicio | Conheça meu trabalho | Olá, Camilla! Vi seu site e estou procurando um imóvel para morar. Gostaria de conversar sobre minhas prioridades e conhecer sua curadoria imobiliária. |
 | about | sobre | Conversar sobre minha busca | Olá, Camilla! Conheci sua proposta de unir arquitetura e curadoria imobiliária. Gostaria de contar o que procuro para meu próximo imóvel. |
 | difference | diferencial | Quero avaliar minhas opções | Olá, Camilla! Gostaria de contar com seu olhar de arquiteta para avaliar as opções de imóveis que estou considerando. Podemos conversar? |
 | contact | contato | Iniciar conversa no WhatsApp | Olá, Camilla! Vim pelo seu site e gostaria de iniciar um atendimento. Podemos conversar sobre o que estou procurando? |
