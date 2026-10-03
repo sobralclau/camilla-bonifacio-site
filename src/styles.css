@@ -352,3 +352,8 @@ body.lead-modal-open{overflow:hidden}
   }
   .hero-editorial-manifesto span:nth-last-child(2){margin:0}
 }
+
+/* Remove o manifesto quando o espaço vertical do mobile em landscape é limitado. */
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+  .hero-editorial-manifesto{display:none}
+}
