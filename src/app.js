@@ -87,10 +87,9 @@ leadForm?.elements.phone?.addEventListener('input',e=>{e.target.value=formatLead
 
 const LEAD_POPUP_SESSION_KEY='camilla_lead_popup_shown';
 const LEAD_POPUP_DELAY_MS=25000;
-const LEAD_POPUP_SCROLL_RATIO=0.5;
+const LEAD_POPUP_SCROLL_RATIO=0.4;
 let leadPopupTimer=null;
 let leadPopupScrollHandler=null;
-let leadPopupExitHandler=null;
 
 function stopLeadPopupTriggers(){
   if(leadPopupTimer){
@@ -100,10 +99,6 @@ function stopLeadPopupTriggers(){
   if(leadPopupScrollHandler){
     window.removeEventListener('scroll',leadPopupScrollHandler);
     leadPopupScrollHandler=null;
-  }
-  if(leadPopupExitHandler){
-    document.removeEventListener('mouseout',leadPopupExitHandler);
-    leadPopupExitHandler=null;
   }
 }
 
@@ -126,14 +121,6 @@ function setupAutomaticLeadPopup(){
     if(progress>=LEAD_POPUP_SCROLL_RATIO)showAutomaticLeadPopup();
   };
   window.addEventListener('scroll',leadPopupScrollHandler,{passive:true});
-
-  const isDesktop=window.matchMedia('(min-width: 821px) and (hover: hover) and (pointer: fine)').matches;
-  if(isDesktop){
-    leadPopupExitHandler=e=>{
-      if(e.relatedTarget===null && e.clientY<=10)showAutomaticLeadPopup();
-    };
-    document.addEventListener('mouseout',leadPopupExitHandler);
-  }
 }
 
 setupAutomaticLeadPopup();
