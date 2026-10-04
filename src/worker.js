@@ -9,13 +9,15 @@ async function sha256Hex(value){
   const digest=await crypto.subtle.digest("SHA-256",data);
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
-async function isAdmin(request){
+async function isAdmin(request,env){
   const auth=request.headers.get("authorization")||"";
   if(!auth.startsWith("Basic "))return false;
   try{
     const decoded=atob(auth.slice(6));
     const i=decoded.indexOf(":");
-    return i>=0 && decoded.slice(0,i)===ADMIN_USER && (await sha256Hex(decoded.slice(i+1)))===ADMIN_PASS_HASH;
+    const adminUser=env.ADMIN_USER||ADMIN_USER;
+    const adminPassHash=env.ADMIN_PASS_HASH||ADMIN_PASS_HASH;
+    return i>=0 && decoded.slice(0,i)===adminUser && (await sha256Hex(decoded.slice(i+1)))===adminPassHash;
   }catch{return false}
 }
 function unauthorized(){
@@ -57,7 +59,7 @@ async function saveLead(request,env){
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function fmtPhone(v){const d=digits(v);return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:v}
 async function markAttended(request,env){
-  if(!(await isAdmin(request)))return unauthorized();
+  if(!(await isAdmin(request,env)))return unauthorized();
   let body;try{body=await request.json()}catch{return json({ok:false,error:"INVALID_JSON"},400)}
   const id=Number(body.id);if(!Number.isInteger(id)||id<1)return json({ok:false,error:"INVALID_ID"},422);
   await ensureTable(env);
@@ -65,7 +67,7 @@ async function markAttended(request,env){
   return json({ok:true});
 }
 async function adminPage(request,env){
-  if(!(await isAdmin(request)))return unauthorized();
+  if(!(await isAdmin(request,env)))return unauthorized();
   if(!env.DB)return new Response("Banco de leads não vinculado.",{status:503,headers:{"content-type":"text/plain; charset=utf-8"}});
   await ensureTable(env);
   const url=new URL(request.url);const days=Math.max(1,Math.min(365,Number(url.searchParams.get("days")||30)));
@@ -94,7 +96,7 @@ export default{async fetch(request,env){
   if(url.pathname==="/api/leads/attended")return request.method==="POST"?markAttended(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/admin/crm-preview"||url.pathname==="/admin/crm-preview/"||url.pathname==="/admin/crm-preview/index.html"){
     if(request.method!=="GET")return json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
-    if(!(await isAdmin(request)))return unauthorized();
+    if(!(await isAdmin(request,env)))return unauthorized();
     const page=await env.ASSETS.fetch(new Request(new URL("/admin/crm-preview/index.html",url),{headers:request.headers}));
     const headers=new Headers(page.headers);
     headers.set("cache-control","private, no-store");

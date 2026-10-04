@@ -22,6 +22,10 @@
     "command": "npm run build"
   },
   "previews": {
+    "vars": {
+      "ADMIN_USER": "camilla-preview-admin",
+      "ADMIN_PASS_HASH": "afe61a92c10436f4578d101ae41979a604761e838fb3df54fad571c8820ca871"
+    },
     "d1_databases": [
       {
         "binding": "DB",
