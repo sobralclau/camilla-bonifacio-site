@@ -88,7 +88,44 @@ async function adminPage(request,env){
   </script></body></html>`;
   return new Response(html,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-robots-tag":"noindex, nofollow, noarchive"}});
 }
+const unavailablePage = `<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Camilla Bonifácio | Site temporariamente indisponível</title>
+  <style>
+    :root{color-scheme:light;--off:#F6EFE6;--copper:#A8694E;--graphite:#2F2F2F;--muted:#71675f}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--off);color:var(--graphite);font-family:Arial,Helvetica,sans-serif}
+    main{width:min(100%,540px);text-align:center;padding:56px 36px;border:1px solid rgba(168,105,78,.22);background:rgba(255,255,255,.62)}
+    .mark{width:42px;height:2px;margin:0 auto 30px;background:var(--copper)}
+    h1{margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(30px,7vw,42px);font-weight:400;line-height:1.15}
+    p{margin:0;color:var(--muted);font-size:15px;line-height:1.7}
+    @media(max-width:480px){main{padding:44px 24px}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mark" aria-hidden="true"></div>
+    <h1>Site temporariamente indisponível</h1>
+    <p>Estamos atualizando este espaço. Por favor, volte em outro momento.</p>
+  </main>
+</body>
+</html>`;
+const unavailableResponse = () => new Response(unavailablePage, {
+  status: 503,
+  headers: {
+    "content-type": "text/html; charset=utf-8",
+    "cache-control": "no-store, no-cache, must-revalidate",
+    "retry-after": "3600",
+    "x-robots-tag": "noindex, nofollow, noarchive"
+  }
+});
 export default{async fetch(request,env){
+  return unavailableResponse();
   const url=new URL(request.url);
   if(url.pathname==="/api/leads")return request.method==="POST"?saveLead(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/api/leads/attended")return request.method==="POST"?markAttended(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
