@@ -1,3 +1,7 @@
+import { json as coreJson } from "./crm-core/utils.js";
+import { validateLeadInput } from "./crm-core/leads.js";
+import clientConfig from "./crm-client/camilla.config.js";
+
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const clean=(v,max=220)=>String(v??"").trim().slice(0,max);
 const digits=v=>String(v??"").replace(/\D/g,"");
@@ -125,8 +129,21 @@ const unavailableResponse = () => new Response(unavailablePage, {
   }
 });
 export default{async fetch(request,env){
-  return unavailableResponse();
   const url=new URL(request.url);
+
+  if(url.pathname==="/api/crm-test/health" && request.method==="GET"){
+    const probe=validateLeadInput({name:"Teste CRM",phone:"83999999999",source:"crm_preview"});
+    return coreJson({
+      ok:true,
+      mode:"preview-test",
+      client:clientConfig.id,
+      platform:clientConfig.platform,
+      database_binding:clientConfig.bindings.database,
+      validation_ok:probe.ok
+    });
+  }
+
+  return unavailableResponse();
   if(url.pathname==="/api/leads")return request.method==="POST"?saveLead(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/api/leads/attended")return request.method==="POST"?markAttended(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/admin/leads")return request.method==="GET"?adminPage(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
