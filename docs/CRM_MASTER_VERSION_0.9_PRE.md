@@ -10,7 +10,7 @@ Estado: pré-registro, em validação técnica e operacional
 Cliente piloto: Camilla Bonifácio  
 Repositório: `sobralclau/camilla-bonifacio-site`  
 Branch: `chore/crm-core-separation`  
-Commit de referência desta consolidação documental: `0c8ceb2e765d2e7f3d0193a5553149afc7264e83`  
+Commit de referência desta consolidação documental: `9f3f3546f846df5d2c55ee976736dc537e76b307`  
 Branch de produção: `main`
 
 Este documento descreve o estado técnico do CRM no estágio anterior ao congelamento da versão 1.0.0. Não constitui certificado de registro, marca registrada ou cessão de direitos.
