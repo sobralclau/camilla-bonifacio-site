@@ -14,3 +14,14 @@ Esta pasta é um scaffold de separação arquitetural. Os módulos ainda não es
 4. Cada cliente mantém banco D1 isolado.
 5. O mesmo núcleo poderá atender múltiplas instâncias Cloudflare Workers.
 6. Alterações somente serão ligadas aos Workers após testes de regressão em branch/preview.
+
+
+## Identificação de versão
+
+Versão documental atual: `0.9.0-pre`.
+
+A futura `1.0.0` somente será definida após testes operacionais, revisão final de dependências e congelamento de um commit de referência.
+
+## Documentação relacionada
+
+Consulte `docs/CRM_DOCUMENTATION_INDEX.md` para o conjunto de documentos de preparação para registro.
