@@ -21,7 +21,7 @@ for (const type of Object.keys(groups)) {
  }
 }
 await rm('dist',{recursive:true,force:true});await mkdir('dist',{recursive:true});await cp('public','dist',{recursive:true});
-await Promise.all(['styles.css','app.js'].map(f=>cp(`src/${f}`,`dist/${f}`)));
+await Promise.all(['styles.css','app.js','motion-preview.css','motion-preview.js'].map(f=>cp(`src/${f}`,`dist/${f}`)));
 const ctx={site,ctas,services,guides,collections};
 const title='Camilla Bonifácio | Arquiteta e Curadoria Imobiliária em João Pessoa';
 const description='Camilla Bonifácio é arquiteta e corretora de imóveis em João Pessoa e Cabedelo. Curadoria imobiliária, arquitetura residencial e orientação para escolher melhor onde morar.';
@@ -29,7 +29,13 @@ const personId=site.siteUrl?site.siteUrl+'/#camilla-bonifacio':undefined;
 const places=(site.areaServed||[]).map(name=>({'@type':name==='Paraíba'?'AdministrativeArea':'City',name}));
 const breadcrumb=(items)=>({'@type':'BreadcrumbList',itemListElement:items.map((item,index)=>({'@type':'ListItem',position:index+1,name:item.name,...(item.url?{item:item.url}:{})}))});
 const homeFaq={'@type':'FAQPage',mainEntity:knowledgeClusters.flatMap(cluster=>cluster.items.map(item=>({'@type':'Question',name:item.q,acceptedAnswer:{'@type':'Answer',text:item.a}})))};
-await writeFile('dist/index.html',layout({...ctx,body:homeBody(ctx),title,description,canonical:site.siteUrl?site.siteUrl+'/':'',schema:[homeFaq]}));
+const homeHtml=layout({...ctx,body:homeBody(ctx),title,description,canonical:site.siteUrl?site.siteUrl+'/':'',schema:[homeFaq]});
+await writeFile('dist/index.html',homeHtml);
+const motionPreviewHtml=homeHtml
+ .replace('<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">','<meta name="robots" content="noindex,nofollow,noarchive">')
+ .replace('</head>','<link rel="stylesheet" href="./motion-preview.css"></head>')
+ .replace('</body>','<script src="./motion-preview.js" defer></script></body>');
+await writeFile('dist/preview-motion.html',motionPreviewHtml);
 const routes=['/'];
 for (const guide of guides) {
  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(guide.id) || !['service','criterion'].includes(guide.kind)) throw Error(`guides/${guide.id}: dados inválidos.`);
