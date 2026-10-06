@@ -1,5 +1,6 @@
 import { json as coreJson } from "./crm-core/utils.js";
 import { validateLeadInput } from "./crm-core/leads.js";
+import { normalizeLifecycle, normalizeOutcome, canCloseAsLost, canCloseAsWon } from "./crm-core/lifecycle.js";
 import clientConfig from "./crm-client/camilla.config.js";
 
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
@@ -92,6 +93,148 @@ async function adminPage(request,env){
   </script></body></html>`;
   return new Response(html,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-robots-tag":"noindex, nofollow, noarchive"}});
 }
+async function ensurePreviewCrmSchema(env){
+  await ensureTable(env);
+  const desired=[
+    ["lifecycle_status","TEXT NOT NULL DEFAULT 'waiting'"],
+    ["outcome","TEXT NOT NULL DEFAULT 'open'"],
+    ["loss_reason","TEXT"],
+    ["deal_value_cents","INTEGER"],
+    ["notes","TEXT"],
+    ["updated_at","TEXT"]
+  ];
+  const info=await env.DB.prepare("PRAGMA table_info(camilla_leads)").all();
+  const existing=new Set((info.results||[]).map(r=>r.name));
+  for(const [name,type] of desired){
+    if(!existing.has(name))await env.DB.prepare(`ALTER TABLE camilla_leads ADD COLUMN ${name} ${type}`).run();
+  }
+}
+const isCrmPreview=env=>env?.CRM_TEST_MODE==="preview";
+async function previewCreateLead(request,env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  let body;try{body=await request.json()}catch{return json({ok:false,error:"INVALID_JSON"},400)}
+  const validation=validateLeadInput(body);
+  if(!validation.ok)return json({ok:false,error:"INVALID_DATA",details:validation.errors},422);
+  await ensurePreviewCrmSchema(env);
+  const phone=validation.lead.phone;
+  const existing=await env.DB.prepare("SELECT COUNT(*) AS total FROM camilla_leads WHERE phone=? AND source='crm_operational_test'").bind(phone).first();
+  const previous=Number(existing?.total||0);
+  const now=new Date().toISOString();
+  const result=await env.DB.prepare(`INSERT INTO camilla_leads
+    (name,phone,cta_id,section,context,source,page,referrer,status,created_at,lifecycle_status,outcome,updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(
+      validation.lead.name,
+      phone,
+      "crm-test",
+      clean(body.section||"curadoria_imobiliaria",120),
+      clean(body.context||"Teste operacional CRM",600),
+      "crm_operational_test",
+      clean(body.page||"/api/crm-test/leads",700),
+      "crm-test",
+      "aguardando",
+      now,
+      "waiting",
+      "open",
+      now
+    ).run();
+  return json({
+    ok:true,
+    id:result.meta?.last_row_id??null,
+    duplicate:previous>0,
+    duplicate_count:previous+1,
+    created_at:now
+  },201);
+}
+async function previewListLeads(env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  await ensurePreviewCrmSchema(env);
+  const result=await env.DB.prepare(`SELECT id,name,phone,section,status,lifecycle_status,outcome,loss_reason,deal_value_cents,notes,created_at,updated_at,
+    (SELECT COUNT(*) FROM camilla_leads x WHERE x.phone=camilla_leads.phone AND x.source='crm_operational_test') AS duplicate_count
+    FROM camilla_leads
+    WHERE source='crm_operational_test'
+    ORDER BY id DESC LIMIT 200`).all();
+  return json({ok:true,rows:result.results||[]});
+}
+async function previewUpdateLead(request,env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  let body;try{body=await request.json()}catch{return json({ok:false,error:"INVALID_JSON"},400)}
+  const id=Number(body.id);
+  if(!Number.isInteger(id)||id<1)return json({ok:false,error:"INVALID_ID"},422);
+  await ensurePreviewCrmSchema(env);
+  const lifecycle=normalizeLifecycle(body.lifecycle_status);
+  const outcome=normalizeOutcome(body.outcome);
+  const lossReason=clean(body.loss_reason,240);
+  const dealValueCents=body.deal_value_cents==null?null:Number(body.deal_value_cents);
+  if(!canCloseAsLost({outcome,lossReason}))return json({ok:false,error:"LOSS_REASON_REQUIRED"},422);
+  if(!canCloseAsWon({outcome,dealValueCents}))return json({ok:false,error:"DEAL_VALUE_REQUIRED"},422);
+  const notes=clean(body.notes,800);
+  const now=new Date().toISOString();
+  const r=await env.DB.prepare(`UPDATE camilla_leads
+    SET lifecycle_status=?, outcome=?, loss_reason=?, deal_value_cents=?, notes=?, status=?, attended_at=CASE WHEN ?='waiting' THEN attended_at ELSE COALESCE(attended_at,?) END, updated_at=?
+    WHERE id=? AND source='crm_operational_test'`)
+    .bind(lifecycle,outcome,lossReason||null,Number.isFinite(dealValueCents)?Math.round(dealValueCents):null,notes||null,lifecycle==="waiting"?"aguardando":"atendido",lifecycle,now,now,id).run();
+  if(!r.meta?.changes)return json({ok:false,error:"LEAD_NOT_FOUND"},404);
+  const row=await env.DB.prepare("SELECT * FROM camilla_leads WHERE id=? LIMIT 1").bind(id).first();
+  return json({ok:true,row});
+}
+async function previewDashboard(request,env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  await ensurePreviewCrmSchema(env);
+  const url=new URL(request.url);
+  const outcome=clean(url.searchParams.get("outcome"),20);
+  const lifecycle=clean(url.searchParams.get("lifecycle_status"),30);
+  const clauses=["source='crm_operational_test'"],bind=[];
+  if(["open","won","lost"].includes(outcome)){clauses.push("outcome=?");bind.push(outcome)}
+  if(["waiting","attended","qualified","closed"].includes(lifecycle)){clauses.push("lifecycle_status=?");bind.push(lifecycle)}
+  let stmt=env.DB.prepare(`SELECT * FROM camilla_leads WHERE ${clauses.join(" AND ")} ORDER BY id DESC LIMIT 200`);
+  if(bind.length)stmt=stmt.bind(...bind);
+  const rows=(await stmt.all()).results||[];
+  const won=rows.filter(r=>r.outcome==="won");
+  const revenue=won.reduce((sum,r)=>sum+Number(r.deal_value_cents||0),0);
+  return json({
+    ok:true,
+    filters:{outcome:outcome||null,lifecycle_status:lifecycle||null},
+    kpis:{
+      leads:rows.length,
+      won:won.length,
+      lost:rows.filter(r=>r.outcome==="lost").length,
+      open:rows.filter(r=>r.outcome==="open").length,
+      revenue_cents:revenue,
+      conversion_percent:rows.length?Number((won.length*100/rows.length).toFixed(2)):0
+    },
+    rows
+  });
+}
+async function previewExport(env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  await ensurePreviewCrmSchema(env);
+  const rows=(await env.DB.prepare("SELECT id,name,phone,section,lifecycle_status,outcome,loss_reason,deal_value_cents,notes,created_at FROM camilla_leads WHERE source='crm_operational_test' ORDER BY id DESC").all()).results||[];
+  const cell=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const headers=["id","name","phone","section","lifecycle_status","outcome","loss_reason","deal_value_cents","notes","created_at"];
+  const csv=[headers.map(cell).join(","),...rows.map(r=>headers.map(h=>cell(r[h])).join(","))].join("\r\n");
+  return new Response("\uFEFF"+csv,{headers:{"content-type":"text/csv; charset=utf-8","content-disposition":'attachment; filename="camilla-crm-preview-test.csv"',"cache-control":"no-store","x-robots-tag":"noindex, nofollow"}});
+}
+async function previewWhatsApp(request,env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  const url=new URL(request.url);
+  const id=Number(url.searchParams.get("id"));
+  if(!Number.isInteger(id)||id<1)return json({ok:false,error:"INVALID_ID"},422);
+  await ensurePreviewCrmSchema(env);
+  const lead=await env.DB.prepare("SELECT id,name,phone FROM camilla_leads WHERE id=? AND source='crm_operational_test' LIMIT 1").bind(id).first();
+  if(!lead)return json({ok:false,error:"LEAD_NOT_FOUND"},404);
+  const phone=digits(lead.phone);
+  const target=phone.startsWith("55")?phone:"55"+phone;
+  const message=`Olá, ${lead.name}. Este é um teste operacional do fluxo de atendimento da Camilla Bonifácio.`;
+  return json({ok:true,url:`https://wa.me/${target}?text=${encodeURIComponent(message)}`});
+}
+async function previewCleanup(env){
+  if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+  await ensurePreviewCrmSchema(env);
+  const r=await env.DB.prepare("DELETE FROM camilla_leads WHERE source='crm_operational_test'").run();
+  return json({ok:true,deleted:r.meta?.changes??0});
+}
+
 const unavailablePage = `<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -131,16 +274,31 @@ const unavailableResponse = () => new Response(unavailablePage, {
 export default{async fetch(request,env){
   const url=new URL(request.url);
 
-  if(url.pathname==="/api/crm-test/health" && request.method==="GET"){
-    const probe=validateLeadInput({name:"Teste CRM",phone:"83999999999",source:"crm_preview"});
-    return coreJson({
-      ok:true,
-      mode:"preview-test",
-      client:clientConfig.id,
-      platform:clientConfig.platform,
-      database_binding:clientConfig.bindings.database,
-      validation_ok:probe.ok
-    });
+  if(url.pathname.startsWith("/api/crm-test/")){
+    if(!isCrmPreview(env))return json({ok:false,error:"PREVIEW_ONLY"},404);
+    if(url.pathname==="/api/crm-test/health" && request.method==="GET"){
+      const probe=validateLeadInput({name:"Teste CRM",phone:"83999999999",source:"crm_preview"});
+      let d1=false;
+      try{await ensurePreviewCrmSchema(env);d1=true}catch{}
+      return coreJson({
+        ok:true,
+        mode:"preview-test",
+        client:clientConfig.id,
+        platform:clientConfig.platform,
+        database_binding:clientConfig.bindings.database,
+        validation_ok:probe.ok,
+        d1_ok:d1
+      });
+    }
+    if(url.pathname==="/api/crm-test/leads" && request.method==="POST")return previewCreateLead(request,env);
+    if(url.pathname==="/api/crm-test/leads" && request.method==="GET")return previewListLeads(env);
+    if(url.pathname==="/api/crm-test/leads/update" && request.method==="POST")return previewUpdateLead(request,env);
+    if(url.pathname==="/api/crm-test/dashboard" && request.method==="GET")return previewDashboard(request,env);
+    if(url.pathname==="/api/crm-test/export" && request.method==="GET")return previewExport(env);
+    if(url.pathname==="/api/crm-test/whatsapp" && request.method==="GET")return previewWhatsApp(request,env);
+    if(url.pathname==="/api/crm-test/auth" && request.method==="GET")return (await isAdmin(request))?json({ok:true,authenticated:true}):unauthorized();
+    if(url.pathname==="/api/crm-test/cleanup" && request.method==="POST")return previewCleanup(env);
+    return json({ok:false,error:"NOT_FOUND"},404);
   }
 
   return unavailableResponse();
