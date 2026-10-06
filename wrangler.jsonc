@@ -28,6 +28,10 @@
         "database_name": "camilla-bonifacio-preview",
         "database_id": "d3d2c490-db53-4ed7-9ba5-46dfbd3f0bb3"
       }
-    ]
-  }
+    ],
+    "vars": {
+      "CRM_TEST_MODE": "preview"
+    }
+  },
+  "preview_urls": true
 }

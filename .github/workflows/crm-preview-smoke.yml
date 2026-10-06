@@ -1,0 +1,27 @@
+name: CRM Preview Smoke Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: "URL do preview Cloudflare"
+        required: true
+        type: string
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run operational smoke tests
+        env:
+          CRM_PREVIEW_URL: ${{ inputs.preview_url }}
+        run: node scripts/crm-preview-smoke.mjs
