@@ -1,0 +1,114 @@
+/* Motion editorial aprovado para a página inicial. */
+body.motion-editorial{
+  --motion-ease:cubic-bezier(.22,.61,.36,1);
+}
+body.motion-editorial .hero-editorial-media,
+body.motion-editorial .hero-editorial-copy,
+body.motion-editorial .hero-actions{
+  will-change:transform,opacity;
+}
+body.motion-editorial .hero-editorial-media img{
+  transform-origin:50% 45%;
+  will-change:transform,opacity;
+}
+body.motion-editorial .hero-editorial-copy h1 span{
+  display:block;
+  will-change:transform,opacity;
+}
+body.motion-editorial .motion-reveal{
+  opacity:0;
+  transform:translate3d(0,24px,0);
+  transition:
+    opacity .82s var(--motion-ease),
+    transform .9s var(--motion-ease);
+  transition-delay:var(--motion-delay,0ms);
+  will-change:transform,opacity;
+}
+body.motion-editorial .motion-reveal.motion-reveal--left{
+  transform:translate3d(-20px,18px,0);
+}
+body.motion-editorial .motion-reveal.motion-reveal--right{
+  transform:translate3d(20px,18px,0);
+}
+body.motion-editorial .motion-reveal.is-visible{
+  opacity:1;
+  transform:translate3d(0,0,0);
+}
+body.motion-editorial .motion-mask{
+  clip-path:inset(9% 0 9% 0 round 0);
+  transition:clip-path 1.05s cubic-bezier(.2,.72,.24,1);
+}
+body.motion-editorial .motion-mask.is-visible{
+  clip-path:inset(0 0 0 0 round 0);
+}
+body.motion-editorial .about-portrait,
+body.motion-editorial .work-card-media{
+  overflow:hidden;
+}
+body.motion-editorial .about-portrait img,
+body.motion-editorial .work-card-media img{
+  transition:
+    transform .7s var(--motion-ease),
+    filter .7s var(--motion-ease);
+}
+@media (hover:hover) and (pointer:fine){
+  body.motion-editorial .work-card{
+    transition:
+      transform .42s var(--motion-ease),
+      box-shadow .42s var(--motion-ease),
+      border-color .42s var(--motion-ease);
+  }
+  body.motion-editorial .work-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(168,105,78,.34);
+    box-shadow:0 24px 52px rgba(47,47,47,.085);
+  }
+  body.motion-editorial .work-card:hover .work-card-media img{
+    transform:scale(1.025);
+  }
+  body.motion-editorial .service{
+    transition:transform .36s var(--motion-ease);
+  }
+  body.motion-editorial .service:hover{
+    transform:translateY(-3px);
+  }
+  body.motion-editorial .button{
+    transition:
+      transform .32s var(--motion-ease),
+      background-color .32s ease,
+      color .32s ease,
+      border-color .32s ease;
+  }
+  body.motion-editorial .button:hover{
+    transform:translateY(-2px);
+  }
+  body.motion-editorial .text-link svg,
+  body.motion-editorial .detail-link svg,
+  body.motion-editorial .work-link svg{
+    transition:transform .32s var(--motion-ease);
+  }
+  body.motion-editorial .text-link:hover svg,
+  body.motion-editorial .detail-link:hover svg,
+  body.motion-editorial .work-link:hover svg{
+    transform:translateX(5px);
+  }
+}
+@media(max-width:820px){
+  body.motion-editorial .motion-reveal,
+  body.motion-editorial .motion-reveal.motion-reveal--left,
+  body.motion-editorial .motion-reveal.motion-reveal--right{
+    transform:translate3d(0,16px,0);
+  }
+  }
+@media(prefers-reduced-motion:reduce){
+  body.motion-editorial .motion-reveal,
+  body.motion-editorial .motion-mask,
+  body.motion-editorial .work-card,
+  body.motion-editorial .service,
+  body.motion-editorial .button{
+    opacity:1!important;
+    transform:none!important;
+    clip-path:none!important;
+    transition:none!important;
+  }
+}

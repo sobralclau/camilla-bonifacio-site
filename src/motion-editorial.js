@@ -1,11 +1,7 @@
 (() => {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  document.body.classList.add('motion-preview');
+  document.body.classList.add('motion-editorial');
 
-  const note = document.createElement('div');
-  note.className = 'motion-preview-note';
-  note.textContent = 'Prévia motion editorial';
-  document.body.appendChild(note);
 
   if (reduce) return;
 
