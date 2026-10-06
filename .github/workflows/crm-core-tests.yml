@@ -26,8 +26,8 @@ jobs:
       - name: CRM core tests
         run: npm run test:crm
 
-      - name: Existing project checks
-        run: npm run check
-
       - name: Build
         run: npm run build
+
+      - name: Existing project checks
+        run: npm run check
