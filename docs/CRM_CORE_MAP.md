@@ -66,7 +66,7 @@ A implementação deve ocorrer em etapa posterior, com testes, sem alterar produ
 
 ## Titularidade e dependências
 
-Este documento é um mapa técnico inicial e não substitui análise jurídica. Antes de registro ou licenciamento, devem ser auditados:
+A separação documental inicial foi consolidada em documentos complementares desta mesma branch. Este mapa permanece como referência de arquitetura e não substitui análise jurídica. Antes do congelamento da versão 1.0.0, devem permanecer auditados:
 
 - histórico de commits;
 - autoria dos componentes;
@@ -78,3 +78,8 @@ Este documento é um mapa técnico inicial e não substitui análise jurídica. 
 ## Regra de preservação
 
 Nenhum componente da marca, conteúdo, fotografia ou ativo exclusivo da Camilla Bonifácio deve ser incorporado ao CRM-base.
+
+
+## Status documental em 2026-10-06
+
+A fronteira documental entre CRM Core e implementação Camilla está concluída para permitir o início dos testes operacionais. O código de produção permanece fora deste processo até validação em preview.
