@@ -74,3 +74,16 @@ Deverá conter, no mínimo:
 ## Observação
 
 Os dados da cliente e o conteúdo de produção não devem ser incluídos no pacote registrável quando não forem necessários para identificar tecnicamente o software.
+
+
+## Snapshot preservado em 2026-10-06
+
+Branch de arquivo criada:
+
+`archive/crm-core-v0.9-pre-2026-10-06`
+
+Commit preservado:
+
+`5a021950c48b09735d16a37f0fe2ececb5674238`
+
+Esse snapshot registra o estado documental e técnico anterior aos testes operacionais completos. Ele não representa a versão final 1.0.0 e não deve ser tratado como pacote definitivo de hash.
