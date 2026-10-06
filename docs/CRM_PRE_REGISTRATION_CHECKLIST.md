@@ -75,3 +75,16 @@ Status geral: **em preparação**
 ## Regra
 
 O hash definitivo não deve ser gerado enquanto houver alteração funcional prevista para a versão 1.0.0.
+
+
+## Marco 2026-10-06
+
+- [x] decisão formal de não gerar o hash definitivo na v0.9 PRE-REGISTRO
+- [x] rotas operacionais de preview preparadas
+- [x] smoke tests automatizados preparados
+- [x] configuração de preview com D1 isolado preparada no repositório
+- [ ] executar smoke tests contra URL pública/privada do Preview Cloudflare
+- [ ] validar autenticação positiva no ambiente de preview
+- [ ] validar painel/responsividade após o Preview ficar acessível
+
+Observação: o hash definitivo permanece adiado até o congelamento da v1.0.0.
