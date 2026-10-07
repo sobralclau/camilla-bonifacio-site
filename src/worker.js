@@ -92,6 +92,7 @@ export default{async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname==="/api/leads")return request.method==="POST"?saveLead(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/api/leads/attended")return request.method==="POST"?markAttended(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
+  if(url.pathname==="/admin" || url.pathname==="/admin/")return Response.redirect(new URL("/admin/leads",request.url).toString(),302);
   if(url.pathname==="/admin/leads")return request.method==="GET"?adminPage(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   return env.ASSETS.fetch(request);
 }};
