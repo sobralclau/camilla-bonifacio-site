@@ -248,7 +248,7 @@ body.lead-modal-open{overflow:hidden}
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(90deg,rgba(32,24,20,.38) 0%,rgba(32,24,20,.30) 30%,rgba(32,24,20,.12) 48%,rgba(32,24,20,.03) 60%,transparent 68%);
+  background:linear-gradient(90deg,rgba(25,18,15,.50) 0%,rgba(25,18,15,.42) 22%,rgba(25,18,15,.27) 36%,rgba(25,18,15,.10) 50%,rgba(25,18,15,.025) 59%,transparent 66%);
   pointer-events:none;
 }
 .hero-editorial-media picture,.hero-editorial-media img{display:block;width:100%;height:100%}
@@ -270,7 +270,7 @@ body.lead-modal-open{overflow:hidden}
   line-height:.96;
   letter-spacing:-.02em;
   text-wrap:initial;
-  text-shadow:0 2px 16px rgba(20,12,8,.22);
+  text-shadow:0 1px 10px rgba(15,10,8,.20);
 }
 .hero-editorial-copy h1 span{display:block;white-space:nowrap}
 .hero--editorial .hero-actions{display:block;margin-top:38px}
