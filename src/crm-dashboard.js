@@ -25,6 +25,7 @@ export async function crmApi(request,env){
  const body=await request.json().catch(()=>null);if(!body)return J({ok:false,error:"INVALID_JSON"},400);
  if(body.action==="create"){
  const name=safe(body.name,100),phone=String(body.phone||"").replace(/\D/g,"").slice(0,15);
+ if(mode==="commercial"&&/(^|[^a-z])(teste|test|testing|qa)([^a-z]|$)/i.test(name))return J({ok:false,error:"TEST_ONLY_IN_LAB"},422);
  if(name.length<2)return J({ok:false,error:"INVALID_NAME"},422);
  const stage=allowedStages.includes(body.stage)?body.stage:"new";
  const amount=Number(body.deal_value_cents||0);

@@ -1,7 +1,8 @@
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const clean=(v,max=220)=>String(v??"").trim().slice(0,max);
 const digits=v=>String(v??"").replace(/\D/g,"");
-import {login,authorized,csrfOK,logout,denied} from "./crm-auth.js";
+import {login,authorized,identity,csrfOK,logout,denied} from "./crm-auth.js";
+const isTestLead=lead=>/(^|[^a-z])(teste|test|testing|qa)([^a-z]|$)/i.test(String(lead.name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,""))||String(lead.source||"").toLowerCase()==="test";
 import {crmApi,crmDashboard} from "./crm-dashboard.js";
 async function ensureTable(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS camilla_leads (
@@ -46,10 +47,12 @@ async function markAttended(request,env){
   let body;try{body=await request.json()}catch{return json({ok:false,error:"INVALID_JSON"},400)}
   const id=Number(body.id);if(!Number.isInteger(id)||id<1)return json({ok:false,error:"INVALID_ID"},422);
   await ensureTable(env);
-  const lead=await env.DB.prepare("SELECT id,name,phone,section,context,created_at FROM camilla_leads WHERE id=?").bind(id).first();
+  const lead=await env.DB.prepare("SELECT id,name,phone,section,context,source,created_at FROM camilla_leads WHERE id=?").bind(id).first();
   if(!lead)return json({ok:false,error:"NOT_FOUND"},404);
-  const now=new Date().toISOString();
-  await env.DB.prepare("INSERT OR IGNORE INTO crm_deals(lead_id,workspace,name,phone,stage,origin_channel,interest_type,notes,first_attended_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)").bind(id,"commercial",lead.name,digits(lead.phone),"contacted","site",lead.section||"Não informado",lead.context||"",now,lead.created_at||now).run();
+  const actor=await identity(request,env);
+  if(isTestLead(lead)&&actor?.role!=="admin")return denied();
+  const now=new Date().toISOString(),test=isTestLead(lead),mode=test?"demo":"commercial";
+  await env.DB.prepare("INSERT OR IGNORE INTO crm_deals(lead_id,workspace,name,phone,stage,origin_channel,interest_type,notes,first_attended_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)").bind(id,mode,lead.name,digits(lead.phone),"contacted","site",lead.section||"Não informado",lead.context||"",now,lead.created_at||now).run();
   const result=await env.DB.prepare("UPDATE camilla_leads SET status='atendido', attended_at=COALESCE(attended_at,?) WHERE id=?").bind(now,id).run();
   if(!result.meta?.changes)return json({ok:false,error:"NOT_FOUND"},404);
   return json({ok:true,crm:true});
@@ -60,7 +63,8 @@ async function adminPage(request,env){
   await ensureTable(env);
   const url=new URL(request.url);const returnMode=url.searchParams.get("return")==="demo"?"demo":"commercial";const days=Math.max(1,Math.min(365,Number(url.searchParams.get("days")||30)));
   const result=await env.DB.prepare("SELECT * FROM camilla_leads WHERE created_at >= datetime('now', ?) ORDER BY id DESC LIMIT 1000").bind(`-${days} days`).all();
-  const rows=result.results||[];
+  const user=await identity(request,env);
+  const rows=(result.results||[]).filter(r=>user?.role==='admin'||!isTestLead(r));
   const trs=rows.map(r=>`<tr>
     <td>${esc(new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Fortaleza",dateStyle:"short",timeStyle:"short"}).format(new Date(r.created_at)))}</td>
     <td><strong>${esc(r.name)}</strong></td><td>${esc(fmtPhone(r.phone))}</td><td>${esc(r.section||"Site")}</td><td class="context">${esc(r.context||"")}</td>
