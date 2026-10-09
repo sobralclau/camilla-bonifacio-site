@@ -50,7 +50,8 @@ const loginPage=(error="")=>new Response(`<!doctype html><html lang="pt-BR"><met
 export async function login(request,env){
  if(request.method==="GET")return loginPage();
  if(request.method!=="POST")return fail();
- if(!originOK(request))return fail();
+ // Login accepts a regular browser form even when privacy settings omit Origin/Referer.
+ // Authenticated CRM mutations still require same-origin CSRF validation.
  if(!env.DB||!env.CRM_SESSION_SECRET||env.CRM_SESSION_SECRET.length<32)return fail();
  const form=await request.formData().catch(()=>null);
  const user=String(form?.get("username")||"").slice(0,100).trim().toLowerCase();
