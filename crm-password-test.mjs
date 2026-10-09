@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {passwordRecord,login,authorized,logout} from './src/crm-auth.js';
+const password='a-test-password-never-used-in-production-123!';
+const env={CRM_ADMIN_USER:'admin',CRM_ADMIN_PASSWORD_HASH:await passwordRecord(password),CRM_SESSION_SECRET:'test-session-secret-at-least-32-characters-long',DB:{prepare:()=>({run:async()=>({}),bind:()=>({first:async()=>null,run:async()=>({})})})}};
+const url='https://crm.example/admin/login';
+const req=(username,pw,origin='https://crm.example')=>new Request(url,{method:'POST',headers:{origin,'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({username,password:pw})});
+const bad=await login(req('admin','incorrect'),env);assert.equal(bad.status,200);assert.match(await bad.text(),/Credenciais inválidas/);
+const cross=await login(req('admin',password,'https://evil.example'),env);assert.equal(cross.status,403);
+const good=await login(req('admin',password),env);assert.equal(good.status,303);
+const session=good.headers.get('set-cookie').split(';')[0];
+assert(await authorized(new Request('https://crm.example/admin/leads',{headers:{cookie:session}}),env));
+assert(!(await authorized(new Request('https://crm.example/admin/leads',{headers:{cookie:session+'x'}}),env)));
+assert(!(await authorized(new Request('https://crm.example/admin/leads'),env)));
+const out=logout(new Request('https://crm.example/admin/logout',{method:'POST',headers:{origin:'https://crm.example'}}));assert.equal(out.status,303);
+console.log('PASS password PBKDF2, login, signed cookie, tampering, missing session, CSRF, logout');

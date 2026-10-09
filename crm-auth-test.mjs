@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import worker from './src/worker.js';
+const keyPair=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+const jwk=await crypto.subtle.exportKey('jwk',keyPair.publicKey);jwk.kid='test-key';
+const originalFetch=globalThis.fetch;
+globalThis.fetch=async url=>new Response(JSON.stringify({keys:[jwk]}),{status:200});
+const enc=obj=>Buffer.from(JSON.stringify(obj)).toString('base64url');
+const domain='example.cloudflareaccess.com',aud='crm-test-aud';
+const token=async overrides=>{
+ const payload={iss:'https://'+domain,aud:[aud],iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+300,...overrides};
+ const content=enc({alg:'RS256',kid:'test-key',typ:'JWT'})+'.'+enc(payload);
+ const signature=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',keyPair.privateKey,new TextEncoder().encode(content));
+ return content+'.'+Buffer.from(signature).toString('base64url');
+};
+const env={ACCESS_TEAM_DOMAIN:domain,ACCESS_AUD:aud,DB:{prepare:()=>({run:async()=>({meta:{changes:1}}),bind:()=>({run:async()=>({meta:{changes:1}})})})}};
+const request=t=>new Request('https://crm.test/api/leads/attended',{method:'POST',headers:{'content-type':'application/json','Cf-Access-Jwt-Assertion':t},body:'{"id":1}'});
+const valid=await worker.fetch(request(await token({})),env);
+assert.equal(valid.status,200);
+const cookieRequest=new Request('https://crm.test/api/leads/attended',{method:'POST',headers:{'content-type':'application/json','cookie':'CF_Authorization='+await token({})},body:'{"id":1}'});
+assert.equal((await worker.fetch(cookieRequest,env)).status,200);
+const expired=await worker.fetch(request(await token({exp:1})),env);assert.equal(expired.status,403);
+const otherAud=await worker.fetch(request(await token({aud:['other']})),env);assert.equal(otherAud.status,403);
+const forged=(await token({})).replace(/.$/,'A');
+const tampered=await worker.fetch(request(forged),env);assert.equal(tampered.status,403);
+globalThis.fetch=originalFetch;
+console.log('PASS JWT RS256 verified; expired, wrong audience, tampered rejected');

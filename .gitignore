@@ -5,3 +5,6 @@ dist/
 .DS_Store
 .sites-runtime/
 .openai/
+.wrangler/
+*.private.*
+crm-*-transform.cjs
