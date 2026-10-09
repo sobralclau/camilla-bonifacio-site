@@ -1,26 +1,15 @@
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const clean=(v,max=220)=>String(v??"").trim().slice(0,max);
 const digits=v=>String(v??"").replace(/\D/g,"");
-const ADMIN_USER="admin";
-const ADMIN_PASS_HASH="80c42362432d687ca51e1e8d819bcee8756b1c6ae61a3205b5c983651021fd12";
+function accessAuthorized(request,env){
+  const expected=env.ACCESS_AUD;
+  if(!expected)return false;
+  // Identity must be verified by Cloudflare Access at the edge.
+  // Never trust an unsigned identity header without Access enforcement.
+  return Boolean(request.headers.get("Cf-Access-Jwt-Assertion"));
+}
+function unauthorized(){return new Response("Acesso administrativo restrito.",{status:403,headers:{"cache-control":"no-store"}})}
 
-async function sha256Hex(value){
-  const data=new TextEncoder().encode(value);
-  const digest=await crypto.subtle.digest("SHA-256",data);
-  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-async function isAdmin(request){
-  const auth=request.headers.get("authorization")||"";
-  if(!auth.startsWith("Basic "))return false;
-  try{
-    const decoded=atob(auth.slice(6));
-    const i=decoded.indexOf(":");
-    return i>=0 && decoded.slice(0,i)===ADMIN_USER && (await sha256Hex(decoded.slice(i+1)))===ADMIN_PASS_HASH;
-  }catch{return false}
-}
-function unauthorized(){
-  return new Response("Autenticação necessária.",{status:401,headers:{"WWW-Authenticate":'Basic realm="Camilla Bonifácio Leads", charset="UTF-8"',"cache-control":"no-store"}});
-}
 async function ensureTable(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS camilla_leads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,26 +35,30 @@ async function saveLead(request,env){
   if(name.length<2||phone.length<10)return json({ok:false,error:"INVALID_DATA"},422);
   await ensureTable(env);
   const createdAt=new Date().toISOString();
+  const normalizedPhone=phone.startsWith("55")&&phone.length>=12?phone.slice(2):phone;
   try{
+    const existing=await env.DB.prepare("SELECT id FROM camilla_leads WHERE phone=? OR phone=? ORDER BY id DESC LIMIT 1").bind(normalizedPhone,"55"+normalizedPhone).first();
+    if(existing)return json({ok:true,duplicate:true,id:existing.id});
     const r=await env.DB.prepare(`INSERT INTO camilla_leads
       (name,phone,cta_id,section,context,source,page,referrer,status,created_at)
       VALUES (?,?,?,?,?,?,?,?,?,?)`)
-      .bind(name,phone,clean(body.cta_id,80),clean(body.section,120),clean(body.context,600),clean(body.source,120),clean(body.page,700),clean(body.referrer,700),"aguardando",createdAt).run();
+      .bind(name,normalizedPhone,clean(body.cta_id,80),clean(body.section,120),clean(body.context,600),clean(body.source,120),clean(body.page,700),clean(body.referrer,700),"aguardando",createdAt).run();
     return json({ok:true,id:r.meta?.last_row_id??null,created_at:createdAt});
   }catch(e){console.error(e);return json({ok:false,error:"DB_WRITE_FAILED"},500)}
 }
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function fmtPhone(v){const d=digits(v);return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:v}
 async function markAttended(request,env){
-  if(!(await isAdmin(request)))return unauthorized();
+  if(!(accessAuthorized(request,env)))return unauthorized();
   let body;try{body=await request.json()}catch{return json({ok:false,error:"INVALID_JSON"},400)}
   const id=Number(body.id);if(!Number.isInteger(id)||id<1)return json({ok:false,error:"INVALID_ID"},422);
   await ensureTable(env);
-  await env.DB.prepare("UPDATE camilla_leads SET status='atendido', attended_at=? WHERE id=?").bind(new Date().toISOString(),id).run();
+  const result=await env.DB.prepare("UPDATE camilla_leads SET status='atendido', attended_at=? WHERE id=?").bind(new Date().toISOString(),id).run();
+  if(!result.meta?.changes)return json({ok:false,error:"NOT_FOUND"},404);
   return json({ok:true});
 }
 async function adminPage(request,env){
-  if(!(await isAdmin(request)))return unauthorized();
+  if(!(accessAuthorized(request,env)))return unauthorized();
   if(!env.DB)return new Response("Banco de leads não vinculado.",{status:503,headers:{"content-type":"text/plain; charset=utf-8"}});
   await ensureTable(env);
   const url=new URL(request.url);const days=Math.max(1,Math.min(365,Number(url.searchParams.get("days")||30)));
@@ -82,7 +75,7 @@ async function adminPage(request,env){
   </style></head><body><div class="wrap"><div class="head"><div><h1>Leads Camilla Bonifácio</h1><div class="sub">Contatos capturados pelo site</div></div><form><select name="days" onchange="this.form.submit()"><option value="7" ${days===7?"selected":""}>7 dias</option><option value="30" ${days===30?"selected":""}>30 dias</option><option value="90" ${days===90?"selected":""}>90 dias</option><option value="365" ${days===365?"selected":""}>1 ano</option></select></form></div><div class="card"><div class="meta"><strong>${rows.length}</strong> lead(s) no período</div><div class="table"><table><thead><tr><th>Data</th><th>Nome</th><th>WhatsApp</th><th>Origem</th><th>Interesse</th><th>Status</th><th>Ação</th></tr></thead><tbody>${trs||'<tr><td colspan="7">Nenhum lead encontrado.</td></tr>'}</tbody></table></div></div></div><script>
   document.querySelectorAll('.wa').forEach(btn=>btn.addEventListener('click',async()=>{
     const id=Number(btn.dataset.id),phone=btn.dataset.phone,name=btn.dataset.name;
-    try{await fetch('/api/leads/attended',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id})});}catch{}
+    // Opening WhatsApp never implies an attended lead.
     location.href='https://wa.me/55'+phone+'?text='+encodeURIComponent('Olá, '+name+'. Sou da equipe da Camilla Bonifácio. Recebi seu contato pelo site e estou entrando em contato para dar continuidade ao atendimento.');
   }));
   </script></body></html>`;
