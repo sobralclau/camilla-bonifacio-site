@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS crm_deals (
  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_crm_deals_site_lead ON crm_deals(workspace,lead_id) WHERE lead_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_crm_deals_workspace_stage ON crm_deals(workspace,stage);
 CREATE INDEX IF NOT EXISTS idx_crm_deals_workspace_created ON crm_deals(workspace,created_at);
 CREATE INDEX IF NOT EXISTS idx_crm_deals_campaign ON crm_deals(campaign_name);
