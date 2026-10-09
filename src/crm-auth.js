@@ -5,15 +5,15 @@ const cookie=(req,name)=>{const item=(req.headers.get("cookie")||"").split(";").
 const headers={"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-robots-tag":"noindex,nofollow,noarchive","referrer-policy":"no-referrer","x-content-type-options":"nosniff"};
 const fail=()=>new Response("Acesso administrativo restrito.",{status:403,headers});
 const saltBytes=()=>crypto.getRandomValues(new Uint8Array(16));
-async function derive(password,salt,iterations=210000){
+async function derive(password,salt,iterations=100000){
  const material=await crypto.subtle.importKey("raw",encoder.encode(password),"PBKDF2",false,["deriveBits"]);
  return encode(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:decode(salt),iterations},material,256));
 }
-export async function passwordRecord(password){const salt=encode(saltBytes());return "pbkdf2_sha256$210000$"+salt+"$"+await derive(password,salt)}
+export async function passwordRecord(password){const salt=encode(saltBytes());return "pbkdf2_sha256$100000$"+salt+"$"+await derive(password,salt)}
 async function compare(password,record){
  const parts=String(record||"").split("$");
- if(parts.length!==4||parts[0]!=="pbkdf2_sha256"||parts[1]!=="210000")return false;
- const actual=decode(await derive(password,parts[2]));
+ if(parts.length!==4||parts[0]!=="pbkdf2_sha256"||parts[1]!=="100000")return false;
+ const actual=decode(await derive(password,parts[2],Number(parts[1])));
  const expected=decode(parts[3]);
  if(actual.length!==expected.length)return false;
  let difference=0;for(let i=0;i<actual.length;i++)difference|=actual[i]^expected[i];
