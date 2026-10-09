@@ -1,31 +1,7 @@
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const clean=(v,max=220)=>String(v??"").trim().slice(0,max);
 const digits=v=>String(v??"").replace(/\D/g,"");
-const base64url=v=>Uint8Array.from(atob(v.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(v.length/4)*4,"=")),c=>c.charCodeAt(0));
-async function accessAuthorized(request,env){
-  const aud=String(env.ACCESS_AUD||"");
-  const domain=String(env.ACCESS_TEAM_DOMAIN||"").replace(/^https?:\/\//,"").replace(/\/$/,"");
-  if(!aud||!/^[-a-z0-9]+\.cloudflareaccess\.com$/.test(domain))return false;
-  const cookie=(request.headers.get("cookie")||"").split(";").map(v=>v.trim()).find(v=>v.startsWith("CF_Authorization="));
-  const token=request.headers.get("Cf-Access-Jwt-Assertion")||cookie?.slice("CF_Authorization=".length)||"";
-  const parts=token.split(".");
-  if(parts.length!==3)return false;
-  try{
-    const header=JSON.parse(new TextDecoder().decode(base64url(parts[0])));
-    const payload=JSON.parse(new TextDecoder().decode(base64url(parts[1])));
-    const now=Math.floor(Date.now()/1000);
-    if(header.alg!=="RS256"||!header.kid||payload.iss!==`https://${domain}`||!Array.isArray(payload.aud)||!payload.aud.includes(aud)||!Number.isFinite(payload.exp)||payload.exp<=now||!Number.isFinite(payload.iat)||payload.iat>now+60||payload.nbf&&payload.nbf>now)return false;
-    const response=await fetch(`https://${domain}/cdn-cgi/access/certs`);
-    if(!response.ok)return false;
-    const jwks=await response.json();
-    const jwk=(jwks.keys||[]).find(k=>k.kid===header.kid&&k.kty==="RSA");
-    if(!jwk)return false;
-    const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
-    return crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,base64url(parts[2]),new TextEncoder().encode(parts[0]+"."+parts[1]));
-  }catch{return false}
-}
-function unauthorized(){return new Response("Acesso administrativo restrito.",{status:403,headers:{"cache-control":"no-store"}})}
-
+import {login,authorized,csrfOK,logout,denied} from "./crm-auth.js";
 async function ensureTable(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS camilla_leads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,7 +40,8 @@ async function saveLead(request,env){
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function fmtPhone(v){const d=digits(v);return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:v}
 async function markAttended(request,env){
-  if(!(await accessAuthorized(request,env)))return unauthorized();
+  if(!(await authorized(request,env)))return denied();
+  if(!csrfOK(request))return denied();
   let body;try{body=await request.json()}catch{return json({ok:false,error:"INVALID_JSON"},400)}
   const id=Number(body.id);if(!Number.isInteger(id)||id<1)return json({ok:false,error:"INVALID_ID"},422);
   await ensureTable(env);
@@ -73,7 +50,7 @@ async function markAttended(request,env){
   return json({ok:true});
 }
 async function adminPage(request,env){
-  if(!(await accessAuthorized(request,env)))return unauthorized();
+  if(!(await authorized(request,env)))return Response.redirect(new URL("/admin/login",request.url).toString(),302);
   if(!env.DB)return new Response("Banco de leads não vinculado.",{status:503,headers:{"content-type":"text/plain; charset=utf-8"}});
   await ensureTable(env);
   const url=new URL(request.url);const days=Math.max(1,Math.min(365,Number(url.searchParams.get("days")||30)));
@@ -87,7 +64,7 @@ async function adminPage(request,env){
   </tr>`).join("");
   const html=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Camilla Bonifácio | Leads</title><style>
   :root{--off:#F6EFE6;--copper:#A8694E;--graphite:#2F2F2F;--line:#e6ddd6}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--off);color:var(--graphite)}.wrap{max-width:1280px;margin:auto;padding:28px 16px}.head{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:18px}h1{margin:0}.sub{color:#6f655f;font-size:13px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}.table{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1000px}th,td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}th{background:#fbf8f5;color:#756a63;text-transform:uppercase;font-size:10px;letter-spacing:.05em}.context{max-width:340px}.status{display:inline-block;border-radius:999px;padding:5px 8px;font-weight:800}.status--wait{background:#f2e6df;color:#854D37}.status--done{background:#e8f3ea;color:#286239}.wa{border:0;background:#25D366;color:#fff;padding:8px 10px;border-radius:9px;font-weight:800;cursor:pointer}button.attend{border:1px solid var(--copper);background:#fff;color:var(--graphite);padding:8px 10px;border-radius:9px;cursor:pointer}button:disabled{opacity:.5}select{height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px}.meta{padding:14px;color:#6f655f;font-size:12px;border-bottom:1px solid var(--line)}
-  </style></head><body><div class="wrap"><div class="head"><div><h1>Leads Camilla Bonifácio</h1><div class="sub">Contatos capturados pelo site</div></div><form><select name="days" onchange="this.form.submit()"><option value="7" ${days===7?"selected":""}>7 dias</option><option value="30" ${days===30?"selected":""}>30 dias</option><option value="90" ${days===90?"selected":""}>90 dias</option><option value="365" ${days===365?"selected":""}>1 ano</option></select></form></div><div class="card"><div class="meta"><strong>${rows.length}</strong> lead(s) no período</div><div class="table"><table><thead><tr><th>Data</th><th>Nome</th><th>WhatsApp</th><th>Origem</th><th>Interesse</th><th>Status</th><th>Ação</th></tr></thead><tbody>${trs||'<tr><td colspan="7">Nenhum lead encontrado.</td></tr>'}</tbody></table></div></div></div><script>
+  </style></head><body><div class="wrap"><div class="head"><div><h1>Leads Camilla Bonifácio</h1><div class="sub">Contatos capturados pelo site</div></div><form method="post" action="/admin/logout"><button type="submit">Sair</button></form><form><select name="days" onchange="this.form.submit()"><option value="7" ${days===7?"selected":""}>7 dias</option><option value="30" ${days===30?"selected":""}>30 dias</option><option value="90" ${days===90?"selected":""}>90 dias</option><option value="365" ${days===365?"selected":""}>1 ano</option></select></form></div><div class="card"><div class="meta"><strong>${rows.length}</strong> lead(s) no período</div><div class="table"><table><thead><tr><th>Data</th><th>Nome</th><th>WhatsApp</th><th>Origem</th><th>Interesse</th><th>Status</th><th>Ação</th></tr></thead><tbody>${trs||'<tr><td colspan="7">Nenhum lead encontrado.</td></tr>'}</tbody></table></div></div></div><script>
   document.querySelectorAll('.wa').forEach(btn=>btn.addEventListener('click',async()=>{
     const id=Number(btn.dataset.id),phone=btn.dataset.phone,name=btn.dataset.name;
     // Opening WhatsApp never implies an attended lead.
@@ -103,6 +80,8 @@ async function adminPage(request,env){
 }
 export default{async fetch(request,env){
   const url=new URL(request.url);
+  if(url.pathname==="/admin/login")return login(request,env);
+  if(url.pathname==="/admin/logout")return logout(request);
   if(url.pathname==="/api/leads")return request.method==="POST"?saveLead(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/api/leads/attended")return request.method==="POST"?markAttended(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/admin" || url.pathname==="/admin/")return Response.redirect(new URL("/admin/leads",request.url).toString(),302);
