@@ -2,6 +2,7 @@ const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:
 const clean=(v,max=220)=>String(v??"").trim().slice(0,max);
 const digits=v=>String(v??"").replace(/\D/g,"");
 import {login,authorized,csrfOK,logout,denied} from "./crm-auth.js";
+import {crmApi,crmDashboard} from "./crm-dashboard.js";
 async function ensureTable(env){
   await env.DB.prepare(`CREATE TABLE IF NOT EXISTS camilla_leads (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,6 +81,8 @@ async function adminPage(request,env){
 }
 export default{async fetch(request,env){
   const url=new URL(request.url);
+  if(url.pathname==="/api/crm")return crmApi(request,env);
+  if(url.pathname==="/admin/crm")return request.method==="GET"?crmDashboard(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
   if(url.pathname==="/admin/login")return login(request,env);
   if(url.pathname==="/admin/logout")return logout(request);
   if(url.pathname==="/api/leads")return request.method==="POST"?saveLead(request,env):json({ok:false,error:"METHOD_NOT_ALLOWED"},405);

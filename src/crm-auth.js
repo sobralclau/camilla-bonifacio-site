@@ -44,7 +44,7 @@ export async function login(request,env){
  if(request.method==="GET")return loginPage();
  if(request.method!=="POST")return fail();
  if(!originOK(request))return fail();
- if(!env.DB||!env.CRM_ADMIN_USER||!env.CRM_ADMIN_PASSWORD_HASH||!env.CRM_SESSION_SECRET||env.CRM_SESSION_SECRET.length<32)return fail();
+ if(!env.DB||!env.CRM_SESSION_SECRET||env.CRM_SESSION_SECRET.length<32)return fail();
  const form=await request.formData().catch(()=>null);
  const user=String(form?.get("username")||"").slice(0,100).trim().toLowerCase();
  const password=String(form?.get("password")||"").slice(0,256);
@@ -52,23 +52,27 @@ export async function login(request,env){
  const identity=ip+"|"+user;
  const state=await attempts(env,identity);
  if(state.blocked)return new Response("Muitas tentativas. Aguarde 15 minutos.",{status:429,headers});
- const ok=user===String(env.CRM_ADMIN_USER).toLowerCase()&&await compare(password,env.CRM_ADMIN_PASSWORD_HASH);
+ const account=await env.DB.prepare("SELECT username,password_hash,role FROM crm_users WHERE username=? AND active=1").bind(user).first();
+ const ok=Boolean(account)&&await compare(password,account.password_hash);
  if(!ok){await failed(env,identity,state);return loginPage(true)}
  await env.DB.prepare("DELETE FROM crm_login_attempts WHERE identity=?").bind(identity).run();
  const exp=Math.floor(Date.now()/1000)+8*3600;
  const nonce=encode(crypto.getRandomValues(new Uint8Array(16)));
  const value=[user,exp,nonce].join(".");
  const session=value+"."+await sign(value,env.CRM_SESSION_SECRET);
- return new Response(null,{status:303,headers:{location:"/admin/leads","set-cookie":"crm_session="+session+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800","cache-control":"no-store"}});
+ return new Response(null,{status:303,headers:{location:"/admin/crm","set-cookie":"crm_session="+session+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800","cache-control":"no-store"}});
 }
-export async function authorized(request,env){
- if(!env.CRM_SESSION_SECRET||env.CRM_SESSION_SECRET.length<32)return false;
+export async function identity(request,env){
+ if(!env.CRM_SESSION_SECRET||env.CRM_SESSION_SECRET.length<32||!env.DB)return null;
  const parts=cookie(request,"crm_session").split(".");
- if(parts.length!==4)return false;
+ if(parts.length!==4)return null;
  const [user,exp,nonce,signature]=parts;
- if(user!==String(env.CRM_ADMIN_USER||"").toLowerCase()||!/^[A-Za-z0-9_-]{20,}$/.test(nonce)||!/^\d{10}$/.test(exp)||Number(exp)<=Date.now()/1000)return false;
- return verify([user,exp,nonce].join("."),signature,env.CRM_SESSION_SECRET);
+ if(!/^[a-z0-9_.-]{1,100}$/.test(user)||!/^[A-Za-z0-9_-]{20,}$/.test(nonce)||!/^\d{10}$/.test(exp)||Number(exp)<=Date.now()/1000)return null;
+ if(!(await verify([user,exp,nonce].join("."),signature,env.CRM_SESSION_SECRET)))return null;
+ const account=await env.DB.prepare("SELECT username,display_name,role FROM crm_users WHERE username=? AND active=1").bind(user).first();
+ return account&&["admin","commercial"].includes(account.role)?account:null;
 }
+export async function authorized(request,env){return Boolean(await identity(request,env))}
 export function csrfOK(request){return originOK(request)}
 export function logout(request){if(request.method!=="POST"||!originOK(request))return fail();return new Response(null,{status:303,headers:{location:"/admin/login","set-cookie":"crm_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0","cache-control":"no-store"}})}
 export function denied(){return fail()}
