@@ -27,7 +27,14 @@ async function verify(value,signature,secret){
  const key=await crypto.subtle.importKey("raw",encoder.encode(secret),{name:"HMAC",hash:"SHA-256"},false,["verify"]);
  try{return crypto.subtle.verify("HMAC",key,decode(signature),encoder.encode(value))}catch{return false}
 }
-function originOK(request){const origin=request.headers.get("origin");return Boolean(origin&&origin===new URL(request.url).origin)}
+function originOK(request){
+ const expected=new URL(request.url).origin;
+ const origin=request.headers.get("origin");
+ if(origin)return origin===expected;
+ const referer=request.headers.get("referer");
+ if(referer){try{return new URL(referer).origin===expected}catch{return false}}
+ return request.headers.get("sec-fetch-site")==="same-origin";
+}
 async function attempts(env,identity){
  await env.DB.prepare("CREATE TABLE IF NOT EXISTS crm_login_attempts (identity TEXT PRIMARY KEY, attempts INTEGER NOT NULL, window_start INTEGER NOT NULL, blocked_until INTEGER NOT NULL)").run();
  const now=Math.floor(Date.now()/1000);
